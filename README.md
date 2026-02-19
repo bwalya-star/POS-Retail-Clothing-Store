@@ -8,12 +8,10 @@ It is designed to streamline retail operations including sales, inventory manage
 
 ## Table of Contents
 
-- [Inception Report](docs/Inception_Report.md)  
-- [Requirements](docs/Requirements.md)  
-- [Research & Analysis](docs/Research_Insights.md)  
-- [Risk Assessment](docs/Risk_Assessment.md)  
-- [High-Level Use Cases](docs/High_Level_Use_Cases.md)  
-- [Lessons Learned](docs/Lessons_Learned.md)  
+- [Inception Report](docs/inception_report.md)  
+- [Problem Statement](docs/problem_statement.md)  
+- [Risk And Feasibility Study](docs/risk_And_reasibility.md)   
+- [High Level Requirements](docs/high_level_requirements.md)   
 
 ---
 
