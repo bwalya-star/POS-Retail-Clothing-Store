@@ -10,7 +10,7 @@ It is designed to streamline retail operations including sales, inventory manage
 
 - [Inception Report](docs/inception_report.md)  
 - [Problem Statement](docs/problem_statement.md)  
-- [Risk And Feasibility Study](docs/risk_And_reasibility.md)   
+- [Risk And Feasibility Study](docs/risk_and_reasibility.md)   
 - [High Level Requirements](docs/high_level_requirements.md)   
 
 ---
