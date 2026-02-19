@@ -18,7 +18,7 @@ It is designed to streamline retail operations including sales, inventory manage
 ## Credits
 
 **Team Members and Roles:**  
-- **Bwalya** – Technical Lead  
+- **Bwalya Mwansa** – Technical Lead  
 - **Moses Kaluba** – Documentation Lead  
 - **Martin** – Quality Assurance  
 - **Bwanga** – Presenter  
