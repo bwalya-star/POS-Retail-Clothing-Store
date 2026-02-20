@@ -21,5 +21,5 @@ It is designed to streamline retail operations including sales, inventory manage
 - **Bwalya Mwansa** – Technical Lead  
 - **Moses Kaluba** – Documentation Lead  
 - **Martin** – Quality Assurance  
-- **Bwanga** – Presenter  
+- **Bwanga Nyirenda** – Presenter  
 - **Rooney** – Coordinator
