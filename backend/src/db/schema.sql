@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS product_specifications (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   style_code TEXT NOT NULL UNIQUE,
   name TEXT NOT NULL,
+  description TEXT,
   base_price REAL NOT NULL
 );
 

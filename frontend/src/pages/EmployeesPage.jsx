@@ -5,14 +5,6 @@ import { roleLabel } from "../roleLabels";
 
 const ROLES = ["cashier", "manager", "superadmin"];
 
-<<<<<<< HEAD
-export default function EmployeesPage() {
-  const { auth } = useAuth();
-  const [employees, setEmployees] = useState([]);
-  const [form, setForm] = useState({ name: "", username: "", password: "", role: "cashier" });
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
-=======
 function nextEmployeeNumber(employees) {
   const highest = employees.reduce((max, employee) => {
     const match = /^EMP-(\d+)$/.exec(employee.employee_number || "");
@@ -29,7 +21,7 @@ export default function EmployeesPage() {
   const [error, setError] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({ name: "", email: "" });
->>>>>>> 7afd5a9c4f889c8bffa21472ae20ef3fdbb5561b
+  const [confirmSaveId, setConfirmSaveId] = useState(null);
 
   async function loadEmployees() {
     const list = await api.listEmployees(auth.token);
@@ -47,13 +39,8 @@ export default function EmployeesPage() {
     setMessage("");
     try {
       const employee = await api.onboardEmployee(auth.token, form);
-<<<<<<< HEAD
-      setMessage(`${employee.username} onboarded as ${roleLabel(employee.role)}.`);
-      setForm({ name: "", username: "", password: "", role: "cashier" });
-=======
       setMessage(`${employee.email} onboarded as ${roleLabel(employee.role)}.`);
       setForm({ name: "", email: "", employeeNumber: "", password: "", role: "cashier" });
->>>>>>> 7afd5a9c4f889c8bffa21472ae20ef3fdbb5561b
       loadEmployees();
     } catch (err) {
       setError(err.message);
@@ -72,29 +59,36 @@ export default function EmployeesPage() {
     }
   }
 
-<<<<<<< HEAD
-=======
   function startEditing(employee) {
     setEditingId(employee.id);
     setEditForm({ name: employee.name, email: employee.email });
+    setConfirmSaveId(null);
     setError("");
     setMessage("");
   }
 
+  function cancelEditing() {
+    setEditingId(null);
+    setConfirmSaveId(null);
+  }
+
+  // Save is a two-step process: first click arms it ("Save" -> "Confirm
+  // Save"), second click actually writes the change.
   async function saveDetails(employeeId) {
     setError("");
     setMessage("");
     try {
       await api.updateEmployeeDetails(auth.token, employeeId, editForm);
       setEditingId(null);
+      setConfirmSaveId(null);
       setMessage("Employee details updated.");
       loadEmployees();
     } catch (err) {
       setError(err.message);
+      setConfirmSaveId(null);
     }
   }
 
->>>>>>> 7afd5a9c4f889c8bffa21472ae20ef3fdbb5561b
   return (
     <div style={{ flex: 1, minWidth: 0 }}>
       <h1>Manage Employees</h1>
@@ -103,20 +97,11 @@ export default function EmployeesPage() {
         <h2>Onboard Employee</h2>
         <form className="row" onSubmit={handleOnboard}>
           <input
-<<<<<<< HEAD
-            placeholder="Name"
-=======
             placeholder="Full name"
->>>>>>> 7afd5a9c4f889c8bffa21472ae20ef3fdbb5561b
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
           />
           <input
-<<<<<<< HEAD
-            placeholder="Username"
-            value={form.username}
-            onChange={(e) => setForm({ ...form, username: e.target.value })}
-=======
             type="email"
             placeholder="Email"
             value={form.email}
@@ -127,7 +112,6 @@ export default function EmployeesPage() {
             aria-label="Generated employee ID"
             onChange={(e) => setForm({ ...form, employeeNumber: e.target.value })}
             placeholder="Employee ID"
->>>>>>> 7afd5a9c4f889c8bffa21472ae20ef3fdbb5561b
           />
           <input
             type="password"
@@ -140,7 +124,10 @@ export default function EmployeesPage() {
               <option key={role} value={role}>{roleLabel(role)}</option>
             ))}
           </select>
-          <button type="submit">Onboard</button>
+          <button type="submit">
+            <span>Onboard</span>
+            <span></span>
+          </button>
         </form>
         {message && <p className="success">{message}</p>}
         {error && <p className="error">{error}</p>}
@@ -151,12 +138,8 @@ export default function EmployeesPage() {
         <thead>
           <tr>
             <th>Name</th>
-<<<<<<< HEAD
-            <th>Username</th>
-=======
             <th>Email</th>
             <th>Employee ID</th>
->>>>>>> 7afd5a9c4f889c8bffa21472ae20ef3fdbb5561b
             <th>Role</th>
             <th>Status</th>
             <th>Change Role</th>
@@ -165,21 +148,6 @@ export default function EmployeesPage() {
         <tbody>
           {employees.map((employee) => (
             <tr key={employee.id}>
-<<<<<<< HEAD
-              <td>{employee.name}</td>
-              <td>{employee.username}</td>
-              <td>{roleLabel(employee.role)}</td>
-              <td>{employee.is_active ? "Active" : "Disabled"}</td>
-              <td>
-                <select
-                  value={employee.role}
-                  onChange={(e) => handleRoleChange(employee.id, e.target.value)}
-                >
-                  {ROLES.map((role) => (
-                    <option key={role} value={role}>{roleLabel(role)}</option>
-                  ))}
-                </select>
-=======
               <td>{editingId === employee.id ? (
                 <input value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
               ) : employee.name}</td>
@@ -192,18 +160,33 @@ export default function EmployeesPage() {
               <td>
                 {editingId === employee.id ? (
                   <div className="row">
-                    <button type="button" onClick={() => saveDetails(employee.id)}>Save</button>
-                    <button type="button" className="ghost" onClick={() => setEditingId(null)}>Cancel</button>
+                    {confirmSaveId === employee.id ? (
+                      <button type="button" onClick={() => saveDetails(employee.id)}>
+                        <span>Confirm Save</span>
+                        <span></span>
+                      </button>
+                    ) : (
+                      <button type="button" onClick={() => setConfirmSaveId(employee.id)}>
+                        <span>Save</span>
+                        <span></span>
+                      </button>
+                    )}
+                    <button type="button" className="ghost" onClick={cancelEditing}>
+                      <span>Cancel</span>
+                      <span></span>
+                    </button>
                   </div>
                 ) : (
                   <div className="row">
                     <select value={employee.role} onChange={(e) => handleRoleChange(employee.id, e.target.value)}>
                       {ROLES.map((role) => <option key={role} value={role}>{roleLabel(role)}</option>)}
                     </select>
-                    <button type="button" className="ghost" onClick={() => startEditing(employee)}>Edit</button>
+                    <button type="button" className="ghost" onClick={() => startEditing(employee)}>
+                      <span>Edit</span>
+                      <span></span>
+                    </button>
                   </div>
                 )}
->>>>>>> 7afd5a9c4f889c8bffa21472ae20ef3fdbb5561b
               </td>
             </tr>
           ))}

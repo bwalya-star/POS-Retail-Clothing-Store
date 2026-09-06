@@ -157,7 +157,7 @@ export default function DashboardPage() {
         </>
       )}
 
-      <style jsx>{`
+      <style>{`
         .dashboard-container {
           flex: 1;
           min-width: 0;
