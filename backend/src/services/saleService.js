@@ -9,6 +9,13 @@ class SaleService {
     this.productRepository = productRepository;
   }
 
+  findRegisterIdByStoreId(storeId) {
+    const register = this.db
+      .prepare("SELECT id FROM registers WHERE store_id = ? ORDER BY id LIMIT 1")
+      .get(storeId);
+    return register ? register.id : null;
+  }
+
   // UC2: Process Sale
   processSale({ registerId, cashierId, customerId, lineItems, payment }) {
     if (!lineItems || lineItems.length === 0) {

@@ -35,6 +35,7 @@ class AuthService {
     }
 
     this.employeeRepository.resetFailedAttempts(employee.id);
+    const registerId = this.employeeRepository.findRegisterIdByStoreId(employee.store_id);
 
     const token = jwt.sign(
       {
@@ -42,12 +43,13 @@ class AuthService {
         role: employee.role,
         name: employee.government_name,
         storeId: employee.store_id,
+        registerId,
       },
       JWT_SECRET,
       { expiresIn: JWT_EXPIRY }
     );
 
-    return { token, role: employee.role, name: employee.government_name };
+    return { token, role: employee.role, name: employee.government_name, registerId };
   }
 }
 
