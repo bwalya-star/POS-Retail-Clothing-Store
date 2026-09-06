@@ -22,6 +22,11 @@ export const api = {
   listInventory: (token) => request("/inventory", { token }),
   restock: (token, sku, quantity) =>
     request("/inventory/restock", { method: "POST", token, body: { sku, quantity } }),
+  createProduct: (token, product) => request("/inventory", { method: "POST", token, body: product }),
+  updateProduct: (token, sku, { size, colour, unitPrice }) =>
+    request(`/inventory/${encodeURIComponent(sku)}`, { method: "PATCH", token, body: { size, colour, unitPrice } }),
+  deleteProduct: (token, sku) =>
+    request(`/inventory/${encodeURIComponent(sku)}`, { method: "DELETE", token }),
   processSale: (token, { registerId, lineItems, payment }) =>
     request("/sales", { method: "POST", token, body: { registerId, lineItems, payment } }),
   onboardEmployee: (token, { name, username, password, role }) =>

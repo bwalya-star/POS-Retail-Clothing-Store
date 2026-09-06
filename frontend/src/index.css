@@ -2,18 +2,64 @@
   box-sizing: border-box;
 }
 
-body {
-  margin: 0;
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  background: #f4f5f7;
-  color: #1a1a1a;
+:root {
+  --bg: #eef8f1;
+  --surface: rgba(255, 255, 255, 0.6);
+  --surface-solid: #ffffff;
+  --surface-muted: rgba(255, 255, 255, 0.4);
+  --border: rgba(47, 158, 92, 0.14);
+  --text: #163223;
+  --text-muted: #6f8b7c;
+  --accent: #2f9e5c;
+  --accent-dark: #23824a;
+  --accent-soft: rgba(47, 158, 92, 0.14);
+  --success: #1fa971;
+  --danger: #e5484d;
+  --radius-lg: 22px;
+  --radius-md: 16px;
+  --radius-sm: 11px;
+  --shadow: 0 8px 32px rgba(22, 50, 35, 0.08);
+  --glass-blur: blur(18px) saturate(160%);
 }
 
-.page {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 24px;
+body {
+  margin: 0;
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  position: relative;
 }
+
+/* Soft blurred colour blobs behind everything, so the frosted-glass
+   panels have something to actually refract - a flat backdrop makes
+   backdrop-filter invisible. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(480px circle at 8% 12%, rgba(47, 158, 92, 0.28), transparent 60%),
+    radial-gradient(420px circle at 92% 18%, rgba(255, 184, 92, 0.22), transparent 60%),
+    radial-gradient(520px circle at 25% 92%, rgba(92, 200, 255, 0.16), transparent 60%),
+    radial-gradient(420px circle at 85% 85%, rgba(47, 158, 92, 0.18), transparent 60%);
+}
+
+h1, h2, h3 {
+  margin: 0 0 4px 0;
+}
+
+/* ---------- Glass surface (shared by sidebar/topbar/card/panel) ---------- */
+
+.glass {
+  background: var(--surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+/* ---------- Auth / centered pages ---------- */
 
 .page.centered {
   min-height: 100vh;
@@ -23,22 +69,132 @@ body {
 }
 
 .card {
-  background: white;
-  border-radius: 8px;
-  padding: 24px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  background: var(--surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.6);
   width: 100%;
   max-width: 400px;
+}
+
+/* ---------- App shell (sidebar + topbar) ---------- */
+
+.shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  background: var(--surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-right: 1px solid rgba(255, 255, 255, 0.5);
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 16px;
+  padding: 0 8px;
+}
+
+.brand .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.25s ease, color 0.25s ease, transform 0.15s ease;
+}
+
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.5);
+  color: var(--text);
+}
+
+.nav-item.active {
+  background: linear-gradient(135deg, rgba(47, 158, 92, 0.22), rgba(255, 255, 255, 0.45));
+  backdrop-filter: blur(6px);
+  color: var(--accent-dark);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 4px 14px rgba(47, 158, 92, 0.18);
+  transform: translateX(2px);
+}
+
+.main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .topbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #ddd;
+  padding: 20px 28px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+  background: var(--surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
 }
+
+.topbar-greeting h2 {
+  font-size: 18px;
+}
+
+.topbar-greeting p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.content {
+  flex: 1;
+  padding: 24px 28px;
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.content.stacked {
+  flex-direction: column;
+}
+
+/* ---------- Buttons / inputs ---------- */
 
 label {
   display: block;
@@ -47,29 +203,86 @@ label {
   font-weight: 600;
 }
 
-input {
+input, select {
   display: block;
   width: 100%;
-  padding: 8px;
+  padding: 10px 12px;
   margin-top: 4px;
   font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.55);
+  color: var(--text);
+}
+
+input:focus, select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 button {
-  padding: 8px 16px;
+  padding: 10px 18px;
   font-size: 14px;
+  font-weight: 600;
   border: none;
-  border-radius: 4px;
-  background: #2563eb;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
   color: white;
   cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+}
+
+button:hover {
+  background: var(--accent-dark);
+  box-shadow: 0 4px 14px rgba(47, 158, 92, 0.3);
+}
+
+button:active {
+  transform: scale(0.97);
 }
 
 button:disabled {
-  background: #9ca3af;
+  background: rgba(111, 139, 124, 0.25);
+  color: rgba(111, 139, 124, 0.8);
   cursor: not-allowed;
+  box-shadow: none;
+}
+
+button.ghost {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(8px);
+  color: var(--text);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+button.ghost:hover {
+  background: rgba(255, 255, 255, 0.75);
+  box-shadow: none;
+}
+
+button.danger {
+  background: var(--danger);
+}
+
+button.danger:hover {
+  background: #c93438;
+  box-shadow: 0 4px 14px rgba(229, 72, 77, 0.3);
+}
+
+button.pill {
+  border-radius: 999px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(8px);
+  color: var(--text);
+  font-weight: 500;
+}
+
+button.pill.active {
+  background: var(--text);
+  color: white;
+  box-shadow: none;
 }
 
 .row {
@@ -77,7 +290,10 @@ button:disabled {
   gap: 8px;
   align-items: center;
   margin-bottom: 16px;
+  flex-wrap: wrap;
 }
+
+/* ---------- Tables ---------- */
 
 .table {
   width: 100%;
@@ -87,21 +303,174 @@ button:disabled {
 
 .table th, .table td {
   text-align: left;
-  padding: 8px;
-  border-bottom: 1px solid #eee;
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
 }
 
-.error {
-  color: #dc2626;
+.table th {
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* ---------- Product grid (POS / Inventory) ---------- */
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+.product-card {
+  background: var(--surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.product-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-3px);
+  box-shadow: 0 14px 30px rgba(22, 50, 35, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+/* Each product keeps its own accent hue on the thumbnail (assigned in JS
+   from the palette) - the shared UI chrome stays green/white, but every
+   item's "theme" is its own colour, per the reference. */
+.product-thumb {
+  height: 72px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 700;
+  color: white;
+  box-shadow: inset 0 -10px 20px rgba(0, 0, 0, 0.12), inset 0 10px 16px rgba(255, 255, 255, 0.35);
+}
+
+.product-card .name {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.product-card .meta {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.product-card .price {
   font-size: 14px;
+  font-weight: 700;
+}
+
+.product-card .actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.product-card .actions button {
+  flex: 1;
+  padding: 6px 8px;
+  font-size: 12px;
+}
+
+/* ---------- Cart / order panel ---------- */
+
+.panel {
+  width: 320px;
+  flex-shrink: 0;
+  background: var(--surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cart-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.cart-line .qty-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cart-line .qty-controls button {
+  padding: 2px 8px;
+  font-size: 12px;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.summary-row.total {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.keypad button {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(8px);
+  color: var(--text);
+  padding: 12px 0;
+  font-weight: 600;
+}
+
+.keypad button:hover {
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: none;
+}
+
+/* ---------- Misc ---------- */
+
+.error {
+  color: var(--danger);
+  font-size: 13px;
 }
 
 .success {
-  color: #16a34a;
-  font-size: 14px;
+  color: var(--success);
+  font-size: 13px;
 }
 
 .subtitle, .hint {
-  color: #666;
+  color: var(--text-muted);
   font-size: 13px;
 }

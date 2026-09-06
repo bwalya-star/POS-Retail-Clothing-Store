@@ -33,7 +33,7 @@ function createApp(db) {
   app.use("/api/auth", buildAuthRouter(authService));
   app.use("/api/employees", buildEmployeesRouter(employeeService));
   app.use("/api/sales", buildSalesRouter(saleService));
-  app.use("/api/inventory", buildInventoryRouter(inventoryService, productRepository));
+  app.use("/api/inventory", buildInventoryRouter(inventoryService));
 
   return app;
 }

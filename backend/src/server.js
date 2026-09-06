@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const createApp = require("./app");
 const { getConnection } = require("./db/connection");
 

@@ -5,3 +5,6 @@ backend/data/
 *.log
 .~lock.*
 .DS_Store
+.env
+.env.*
+!.env.example
