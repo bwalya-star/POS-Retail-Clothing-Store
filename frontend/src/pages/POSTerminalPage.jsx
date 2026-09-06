@@ -110,14 +110,14 @@ export default function POSTerminalPage() {
               <tr key={li.id}>
                 <td>{li.sku} ({li.size}/{li.colour})</td>
                 <td>{li.quantity}</td>
-                <td>${li.subtotal.toFixed(2)}</td>
+                <td>K{li.subtotal.toFixed(2)}</td>
               </tr>
             ))}
           </tbody>
         </table>
-        <div className="summary-row total"><span>Total</span><span>${receipt.total_amount.toFixed(2)}</span></div>
-        <div className="summary-row"><span>Paid ({receipt.payment.method})</span><span>${receipt.payment.amount.toFixed(2)}</span></div>
-        <div className="summary-row"><span>Change due</span><span>${receipt.changeDue.toFixed(2)}</span></div>
+        <div className="summary-row total"><span>Total</span><span>K{receipt.total_amount.toFixed(2)}</span></div>
+        <div className="summary-row"><span>Paid ({receipt.payment.method})</span><span>K{receipt.payment.amount.toFixed(2)}</span></div>
+        <div className="summary-row"><span>Change due</span><span>K{receipt.changeDue.toFixed(2)}</span></div>
         <button onClick={startNewSale}>Start New Sale</button>
       </div>
     );
@@ -148,7 +148,7 @@ export default function POSTerminalPage() {
               <div className="name">{v.product_name}</div>
               <div className="meta">{v.sku}</div>
               <div className="meta">{v.size} / {v.colour} &middot; {v.quantity_on_hand} in stock</div>
-              <div className="price">${v.unit_price.toFixed(2)}</div>
+              <div className="price">K{v.unit_price.toFixed(2)}</div>
             </div>
           ))}
         </div>
@@ -161,7 +161,7 @@ export default function POSTerminalPage() {
           <div className="cart-line" key={line.variant.id}>
             <div>
               <div>{line.variant.product_name}</div>
-              <div className="meta">{line.variant.sku} &middot; ${line.variant.unit_price.toFixed(2)}</div>
+              <div className="meta">{line.variant.sku} &middot; K{line.variant.unit_price.toFixed(2)}</div>
             </div>
             <div className="qty-controls">
               <button className="ghost" onClick={() => changeQuantity(line.variant.id, -1)}>-</button>
@@ -175,7 +175,7 @@ export default function POSTerminalPage() {
 
         <div className="summary-row total">
           <span>Total</span>
-          <span>${total.toFixed(2)}</span>
+          <span>K{total.toFixed(2)}</span>
         </div>
 
         {phase === "shopping" && (

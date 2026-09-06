@@ -80,7 +80,7 @@ export default function DashboardPage() {
             <div className="stat-card">
               <span className="stat-label">Total Revenue</span>
               <span className="stat-value">
-                ${Number(summary.totalRevenue).toFixed(2)}
+                K{Number(summary.totalRevenue).toFixed(2)}
               </span>
             </div>
             <div className="stat-card">
@@ -90,7 +90,7 @@ export default function DashboardPage() {
             <div className="stat-card">
               <span className="stat-label">Average Sale</span>
               <span className="stat-value">
-                ${Number(summary.averageSaleValue).toFixed(2)}
+                K{Number(summary.averageSaleValue).toFixed(2)}
               </span>
             </div>
           </div>
@@ -133,7 +133,7 @@ export default function DashboardPage() {
                           <span className="metric">
                             <span className="metric-label">Revenue:</span>
                             <span className="metric-value">
-                              ${Number(product.revenue).toFixed(2)}
+                              K{Number(product.revenue).toFixed(2)}
                             </span>
                           </span>
                         </div>

@@ -49,15 +49,6 @@ class EmployeeRepository {
     this.db.prepare("UPDATE employees SET is_active = 0 WHERE id = ?").run(id);
   }
 
-<<<<<<< HEAD
-  insert({ storeId, username, passwordHash, name, role }) {
-    const result = this.db
-      .prepare(
-        `INSERT INTO employees (store_id, username, password_hash, name, role)
-         VALUES (?, ?, ?, ?, ?)`
-      )
-      .run(storeId, username, passwordHash, name, role);
-=======
   insert({ storeId, email, employeeNumber, name, passwordHash, role }) {
     const result = this.db
       .prepare(
@@ -75,7 +66,6 @@ class EmployeeRepository {
         name,
         role
       );
->>>>>>> 7afd5a9c4f889c8bffa21472ae20ef3fdbb5561b
     return result.lastInsertRowid;
   }
 
@@ -83,12 +73,6 @@ class EmployeeRepository {
     this.db.prepare("UPDATE employees SET role = ? WHERE id = ?").run(role, id);
   }
 
-<<<<<<< HEAD
-  listAll() {
-    return this.db
-      .prepare(
-        "SELECT id, store_id, username, name, role, is_active FROM employees ORDER BY name"
-=======
   findByEmailExcludingId(email, id) {
     return this.db
       .prepare("SELECT * FROM employees WHERE email = ? AND id != ?")
@@ -110,7 +94,6 @@ class EmployeeRepository {
       .prepare(
         `SELECT id, store_id, email, employee_number, name, role, is_active
          FROM employees ORDER BY name`
->>>>>>> 7afd5a9c4f889c8bffa21472ae20ef3fdbb5561b
       )
       .all();
   }
