@@ -15,6 +15,13 @@ class EmployeeRepository {
       .get(employeeNumber);
   }
 
+  findRegisterIdByStoreId(storeId) {
+    const register = this.db
+      .prepare("SELECT id FROM registers WHERE store_id = ? ORDER BY id LIMIT 1")
+      .get(storeId);
+    return register ? register.id : null;
+  }
+
   getNextEmployeeNumber() {
     const result = this.db
       .prepare(

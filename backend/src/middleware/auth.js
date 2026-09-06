@@ -9,6 +9,12 @@ function requireAuth(req, res, next) {
   }
   try {
     req.user = jwt.verify(token, JWT_SECRET);
+    const employee = req.app.locals.db
+      ?.prepare("SELECT id, is_active FROM employees WHERE id = ?")
+      .get(req.user.sub);
+    if (!employee || !employee.is_active) {
+      return res.status(401).json({ error: "Session is no longer valid. Please log in again." });
+    }
     next();
   } catch {
     return res.status(401).json({ error: "Invalid or expired token." });

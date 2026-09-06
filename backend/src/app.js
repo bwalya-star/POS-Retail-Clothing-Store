@@ -26,6 +26,7 @@ function createApp(db) {
   const inventoryService = new InventoryService(productRepository);
 
   const app = express();
+  app.locals.db = db;
   app.use(cors());
   app.use(express.json());
 

@@ -11,7 +11,7 @@ function colourFor(key) {
 }
 
 export default function POSTerminalPage() {
-  const { auth } = useAuth();
+  const { auth, logout } = useAuth();
   const [products, setProducts] = useState([]);
   const [category, setCategory] = useState("All");
   const [cart, setCart] = useState([]); // [{ variant, quantity }]
@@ -79,13 +79,17 @@ export default function POSTerminalPage() {
     setError("");
     try {
       const sale = await api.processSale(auth.token, {
-        registerId: 1,
+        registerId: auth.registerId,
         lineItems: cart.map((line) => ({ sku: line.variant.sku, quantity: line.quantity })),
         payment: { amount: Number(paymentAmount), method: "cash" },
       });
       setReceipt(sale);
       setPhase("done");
     } catch (err) {
+      if (err.status === 401) {
+        logout();
+        return;
+      }
       setError(err.message);
     }
   }

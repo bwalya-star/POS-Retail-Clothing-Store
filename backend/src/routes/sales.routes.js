@@ -11,14 +11,16 @@ function buildSalesRouter(saleService) {
 
   router.post("/", requireAuth, requireRole("cashier", "manager", "superadmin"), (req, res) => {
     const { registerId, customerId, lineItems, payment } = req.body || {};
-    if (!registerId || !Array.isArray(lineItems) || !payment) {
+    const resolvedRegisterId =
+      registerId || req.user.registerId || saleService.findRegisterIdByStoreId(req.user.storeId);
+    if (!resolvedRegisterId || !Array.isArray(lineItems) || !payment) {
       return res
         .status(400)
         .json({ error: "registerId, lineItems[], and payment are required." });
     }
     try {
       const sale = saleService.processSale({
-        registerId,
+        registerId: resolvedRegisterId,
         cashierId: req.user.sub,
         customerId,
         lineItems,
