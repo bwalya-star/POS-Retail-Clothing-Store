@@ -8,7 +8,12 @@ function stockLevel(quantity) {
   return "ok";
 }
 
-const BLANK_PRODUCT = { styleCode: "", productName: "", description: "", basePrice: "", sku: "", size: "", colour: "", unitPrice: "", quantityOnHand: "" };
+const BLANK_PRODUCT = { styleCode: "", productName: "", description: "", size: "", colour: "", unitPrice: "", quantityOnHand: "" };
+const SIZE_OPTIONS = [
+  { value: "S", label: "Small" },
+  { value: "M", label: "Medium" },
+  { value: "L", label: "Large" },
+];
 
 export default function InventoryPage() {
   const { auth } = useAuth();
@@ -58,6 +63,31 @@ export default function InventoryPage() {
     setPanel({ mode: "restock", variant });
   }
 
+  function lookupProductBarcode(barcode) {
+    const normalizedBarcode = barcode.trim();
+    if (!normalizedBarcode) return;
+
+    const match = products.find(
+      (product) => product.sku === normalizedBarcode || product.style_code === normalizedBarcode
+    );
+    if (!match) {
+      setMessage("Barcode not found. Complete the product details manually.");
+      return;
+    }
+
+    setForm((current) => ({
+      ...current,
+      styleCode: normalizedBarcode,
+      productName: match.product_name,
+      description: match.description || "",
+      size: match.size,
+      colour: match.colour,
+      unitPrice: String(match.unit_price),
+    }));
+    setMessage(`${match.product_name} details filled from barcode.`);
+    setError("");
+  }
+
   async function submitAdd(e) {
     e.preventDefault();
     setError("");
@@ -66,14 +96,13 @@ export default function InventoryPage() {
         styleCode: form.styleCode,
         productName: form.productName,
         description: form.description,
-        basePrice: form.basePrice ? Number(form.basePrice) : undefined,
-        sku: form.sku,
+        sku: form.styleCode,
         size: form.size,
         colour: form.colour,
         unitPrice: Number(form.unitPrice),
         quantityOnHand: Number(form.quantityOnHand) || 0,
       });
-      setMessage(`${form.sku} added.`);
+      setMessage(`${form.styleCode} added.`);
       setPanel(null);
       loadInventory();
     } catch (err) {
@@ -196,14 +225,40 @@ export default function InventoryPage() {
           {panel === "add" && (
             <form onSubmit={submitAdd}>
               <h2>Add Product</h2>
-              <label>Style Code<input value={form.styleCode} onChange={(e) => setForm({ ...form, styleCode: e.target.value })} required /></label>
+              <label>Product Barcode
+                <div className="row">
+                  <input
+                    value={form.styleCode}
+                    onChange={(e) => setForm({ ...form, styleCode: e.target.value })}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        lookupProductBarcode(form.styleCode);
+                      }
+                    }}
+                    placeholder="Scan or enter barcode"
+                    required
+                  />
+                  <button type="button" className="ghost" onClick={() => lookupProductBarcode(form.styleCode)}>
+                    Lookup
+                  </button>
+                </div>
+              </label>
               <label>Product Name<input value={form.productName} onChange={(e) => setForm({ ...form, productName: e.target.value })} required /></label>
               <label>Description<input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Short description shown on the POS list" /></label>
-              <label>Base Price (only needed for a new style)<input type="number" step="0.01" value={form.basePrice} onChange={(e) => setForm({ ...form, basePrice: e.target.value })} /></label>
-              <label>SKU<input value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} required /></label>
-              <label>Size<input value={form.size} onChange={(e) => setForm({ ...form, size: e.target.value })} required /></label>
+              <label>Size
+                <select value={form.size} onChange={(e) => setForm({ ...form, size: e.target.value })} required>
+                  <option value="" disabled>Select size</option>
+                  {form.size && !SIZE_OPTIONS.some((size) => size.value === form.size) && (
+                    <option value={form.size}>{form.size}</option>
+                  )}
+                  {SIZE_OPTIONS.map((size) => (
+                    <option key={size.value} value={size.value}>{size.label}</option>
+                  ))}
+                </select>
+              </label>
               <label>Colour<input value={form.colour} onChange={(e) => setForm({ ...form, colour: e.target.value })} required /></label>
-              <label>Unit Price<input type="number" step="0.01" value={form.unitPrice} onChange={(e) => setForm({ ...form, unitPrice: e.target.value })} required /></label>
+              <label>Price<input type="number" step="0.01" value={form.unitPrice} onChange={(e) => setForm({ ...form, unitPrice: e.target.value })} required /></label>
               <label>Initial Quantity<input type="number" value={form.quantityOnHand} onChange={(e) => setForm({ ...form, quantityOnHand: e.target.value })} /></label>
               {error && <p className="error">{error}</p>}
               <div className="row">
@@ -224,7 +279,7 @@ export default function InventoryPage() {
               <h2>Edit {panel.variant.sku}</h2>
               <label>Size<input value={form.size} onChange={(e) => setForm({ ...form, size: e.target.value })} required /></label>
               <label>Colour<input value={form.colour} onChange={(e) => setForm({ ...form, colour: e.target.value })} required /></label>
-              <label>Unit Price<input type="number" step="0.01" value={form.unitPrice} onChange={(e) => setForm({ ...form, unitPrice: e.target.value })} required /></label>
+              <label>Price<input type="number" step="0.01" value={form.unitPrice} onChange={(e) => setForm({ ...form, unitPrice: e.target.value })} required /></label>
               {error && <p className="error">{error}</p>}
               <div className="row">
                 <button type="button" className="ghost" onClick={() => setPanel(null)}>
