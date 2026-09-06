@@ -21,6 +21,7 @@ export default function EmployeesPage() {
   const [error, setError] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({ name: "", email: "" });
+  const [confirmSaveId, setConfirmSaveId] = useState(null);
 
   async function loadEmployees() {
     const list = await api.listEmployees(auth.token);
@@ -61,20 +62,30 @@ export default function EmployeesPage() {
   function startEditing(employee) {
     setEditingId(employee.id);
     setEditForm({ name: employee.name, email: employee.email });
+    setConfirmSaveId(null);
     setError("");
     setMessage("");
   }
 
+  function cancelEditing() {
+    setEditingId(null);
+    setConfirmSaveId(null);
+  }
+
+  // Save is a two-step process: first click arms it ("Save" -> "Confirm
+  // Save"), second click actually writes the change.
   async function saveDetails(employeeId) {
     setError("");
     setMessage("");
     try {
       await api.updateEmployeeDetails(auth.token, employeeId, editForm);
       setEditingId(null);
+      setConfirmSaveId(null);
       setMessage("Employee details updated.");
       loadEmployees();
     } catch (err) {
       setError(err.message);
+      setConfirmSaveId(null);
     }
   }
 
@@ -113,7 +124,10 @@ export default function EmployeesPage() {
               <option key={role} value={role}>{roleLabel(role)}</option>
             ))}
           </select>
-          <button type="submit">Onboard</button>
+          <button type="submit">
+            <span>Onboard</span>
+            <span></span>
+          </button>
         </form>
         {message && <p className="success">{message}</p>}
         {error && <p className="error">{error}</p>}
@@ -146,15 +160,31 @@ export default function EmployeesPage() {
               <td>
                 {editingId === employee.id ? (
                   <div className="row">
-                    <button type="button" onClick={() => saveDetails(employee.id)}>Save</button>
-                    <button type="button" className="ghost" onClick={() => setEditingId(null)}>Cancel</button>
+                    {confirmSaveId === employee.id ? (
+                      <button type="button" onClick={() => saveDetails(employee.id)}>
+                        <span>Confirm Save</span>
+                        <span></span>
+                      </button>
+                    ) : (
+                      <button type="button" onClick={() => setConfirmSaveId(employee.id)}>
+                        <span>Save</span>
+                        <span></span>
+                      </button>
+                    )}
+                    <button type="button" className="ghost" onClick={cancelEditing}>
+                      <span>Cancel</span>
+                      <span></span>
+                    </button>
                   </div>
                 ) : (
                   <div className="row">
                     <select value={employee.role} onChange={(e) => handleRoleChange(employee.id, e.target.value)}>
                       {ROLES.map((role) => <option key={role} value={role}>{roleLabel(role)}</option>)}
                     </select>
-                    <button type="button" className="ghost" onClick={() => startEditing(employee)}>Edit</button>
+                    <button type="button" className="ghost" onClick={() => startEditing(employee)}>
+                      <span>Edit</span>
+                      <span></span>
+                    </button>
                   </div>
                 )}
               </td>

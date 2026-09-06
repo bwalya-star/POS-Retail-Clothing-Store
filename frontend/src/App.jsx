@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { ThemeProvider } from "./context/ThemeContext";
 import AppShell from "./components/AppShell";
 import LoginPage from "./pages/LoginPage";
 import POSTerminalPage from "./pages/POSTerminalPage";
@@ -9,6 +10,7 @@ import EmployeesPage from "./pages/EmployeesPage";
 const NAV_BY_ROLE = {
   cashier: [{ key: "pos", label: "POS" }],
   manager: [
+    { key: "pos", label: "POS" },
     { key: "inventory", label: "Inventory" },
     { key: "employees", label: "Employees" },
   ],
@@ -46,8 +48,10 @@ function Root() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <Root />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <Root />
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

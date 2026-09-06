@@ -16,7 +16,12 @@ function seed() {
      DELETE FROM product_specifications;
      DELETE FROM employees;
      DELETE FROM registers;
-     DELETE FROM stores;`
+     DELETE FROM stores;
+     DELETE FROM sqlite_sequence WHERE name IN (
+       'stock_adjustments', 'payments', 'sales_line_items', 'sales',
+       'customers', 'product_variants', 'product_specifications',
+       'employees', 'registers', 'stores'
+     );`
   );
 
   const storeId = db
@@ -51,14 +56,14 @@ function seed() {
   }
 
   const specs = [
-    { styleCode: "TSH-001", name: "Classic T-Shirt", basePrice: 15.0 },
-    { styleCode: "JNS-001", name: "Slim Fit Jeans", basePrice: 35.0 },
-    { styleCode: "JKT-001", name: "Denim Jacket", basePrice: 55.0 },
+    { styleCode: "TSH-001", name: "Classic T-Shirt", description: "Soft cotton crew neck, everyday fit.", basePrice: 15.0 },
+    { styleCode: "JNS-001", name: "Slim Fit Jeans", description: "Stretch denim, tapered leg.", basePrice: 35.0 },
+    { styleCode: "JKT-001", name: "Denim Jacket", description: "Mid-weight trucker jacket, button front.", basePrice: 55.0 },
   ];
   const insertSpec = db.prepare(
-    "INSERT INTO product_specifications (style_code, name, base_price) VALUES (?, ?, ?)"
+    "INSERT INTO product_specifications (style_code, name, description, base_price) VALUES (?, ?, ?, ?)"
   );
-  const specIds = specs.map((s) => insertSpec.run(s.styleCode, s.name, s.basePrice).lastInsertRowid);
+  const specIds = specs.map((s) => insertSpec.run(s.styleCode, s.name, s.description, s.basePrice).lastInsertRowid);
 
   const variants = [
     { specIdx: 0, sku: "TSH-001-S-BLK", size: "S", colour: "Black", price: 15.0, qty: 20 },

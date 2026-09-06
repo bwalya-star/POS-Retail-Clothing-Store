@@ -41,7 +41,7 @@ function buildInventoryRouter(inventoryService) {
 
   // UC5: Manage Products - Add
   router.post("/", requireAuth, requireRole("manager", "superadmin"), (req, res) => {
-    const { styleCode, productName, basePrice, sku, size, colour, unitPrice, quantityOnHand } = req.body || {};
+    const { styleCode, productName, description, basePrice, sku, size, colour, unitPrice, quantityOnHand } = req.body || {};
     if (!styleCode || !productName || !sku || !size || !colour || !unitPrice) {
       return res.status(400).json({
         error: "styleCode, productName, sku, size, colour, and unitPrice are required.",
@@ -51,6 +51,7 @@ function buildInventoryRouter(inventoryService) {
       const variant = inventoryService.createProduct({
         styleCode,
         productName,
+        description,
         basePrice,
         sku,
         size,
