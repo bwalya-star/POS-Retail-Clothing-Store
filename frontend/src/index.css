@@ -3,23 +3,96 @@
 }
 
 :root {
-  --bg: #eef8f1;
-  --surface: rgba(255, 255, 255, 0.6);
+  --bg: #fdf6ec;
+  --surface: rgba(255, 255, 255, 0.65);
   --surface-solid: #ffffff;
   --surface-muted: rgba(255, 255, 255, 0.4);
-  --border: rgba(47, 158, 92, 0.14);
-  --text: #163223;
-  --text-muted: #6f8b7c;
-  --accent: #2f9e5c;
-  --accent-dark: #23824a;
-  --accent-soft: rgba(47, 158, 92, 0.14);
+  --border: rgba(247, 148, 29, 0.16);
+  --text: #241d14;
+  --text-muted: #8a7c68;
+  --accent: #f7941d;
+  --accent-dark: #d97b0a;
+  --accent-soft: rgba(247, 148, 29, 0.16);
   --success: #1fa971;
   --danger: #e5484d;
+  --warning: #b8790a;
+  --warning-soft: rgba(247, 148, 29, 0.16);
   --radius-lg: 22px;
   --radius-md: 16px;
   --radius-sm: 11px;
-  --shadow: 0 8px 32px rgba(22, 50, 35, 0.08);
+  --shadow: 0 8px 32px rgba(40, 30, 10, 0.08);
   --glass-blur: blur(18px) saturate(160%);
+}
+
+/* Dark mode is intentionally monochrome - one neutral dark shade, no
+   brand accent colour. Semantic colours (success/danger/warning) stay,
+   since those carry meaning rather than branding. */
+:root[data-theme="dark"] {
+  --bg: #16161a;
+  --surface: rgba(255, 255, 255, 0.05);
+  --surface-solid: #1f1f24;
+  --surface-muted: rgba(255, 255, 255, 0.04);
+  --border: rgba(255, 255, 255, 0.12);
+  --text: #f0f0ee;
+  --text-muted: #98989a;
+  --accent: #3a3a40;
+  --accent-dark: #4a4a52;
+  --accent-soft: rgba(255, 255, 255, 0.1);
+  --success: #3fcb7d;
+  --danger: #ff6b70;
+  --warning: #ffb84d;
+  --warning-soft: rgba(255, 184, 77, 0.16);
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+}
+
+:root[data-theme="dark"] body::before {
+  background: radial-gradient(900px circle at 50% 0%, rgba(255, 255, 255, 0.05), transparent 60%);
+}
+
+:root[data-theme="dark"] .nav-item.active {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+:root[data-theme="dark"] .login-brand-row,
+:root[data-theme="dark"] .field-reveal:hover {
+  color: var(--text);
+}
+
+:root[data-theme="dark"] .card,
+:root[data-theme="dark"] .sidebar,
+:root[data-theme="dark"] .topbar,
+:root[data-theme="dark"] .product-card,
+:root[data-theme="dark"] .panel {
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+:root[data-theme="dark"] input,
+:root[data-theme="dark"] select {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+}
+
+:root[data-theme="dark"] button.ghost,
+:root[data-theme="dark"] button.pill,
+:root[data-theme="dark"] .keypad button,
+:root[data-theme="dark"] .field-reveal {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--text);
+}
+
+:root[data-theme="dark"] button.ghost:hover,
+:root[data-theme="dark"] .keypad button:hover,
+:root[data-theme="dark"] .field-reveal:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+:root[data-theme="dark"] button.pill.active {
+  background: var(--text);
+  color: var(--bg);
 }
 
 body {
@@ -39,10 +112,10 @@ body::before {
   inset: 0;
   z-index: -1;
   background:
-    radial-gradient(480px circle at 8% 12%, rgba(47, 158, 92, 0.28), transparent 60%),
+    radial-gradient(480px circle at 8% 12%, rgba(247, 148, 29, 0.24), transparent 60%),
     radial-gradient(420px circle at 92% 18%, rgba(255, 184, 92, 0.22), transparent 60%),
-    radial-gradient(520px circle at 25% 92%, rgba(92, 200, 255, 0.16), transparent 60%),
-    radial-gradient(420px circle at 85% 85%, rgba(47, 158, 92, 0.18), transparent 60%);
+    radial-gradient(520px circle at 25% 92%, rgba(92, 200, 255, 0.14), transparent 60%),
+    radial-gradient(420px circle at 85% 85%, rgba(247, 148, 29, 0.16), transparent 60%);
 }
 
 h1, h2, h3 {
@@ -59,13 +132,174 @@ h1, h2, h3 {
   box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
-/* ---------- Auth / centered pages ---------- */
+/* ---------- Login page ---------- */
 
-.page.centered {
+.login-shell {
+  position: relative;
   min-height: 100vh;
+}
+
+.login-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  align-items: center;
+  gap: 48px;
+  min-height: 100vh;
+  padding: 48px clamp(24px, 5vw, 72px);
+}
+
+.login-brand-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-dark);
+}
+
+.login-brand-row .dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 5px var(--accent-soft);
+}
+
+.login-heading {
+  margin: 24px 0 0;
+  font-size: clamp(34px, 4.4vw, 54px);
+  line-height: 1.04;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.login-tagline {
+  margin: 20px 0 0;
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--text-muted);
+  max-width: 40ch;
+}
+
+.login-card {
+  max-width: 420px;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.login-card-head h2 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.login-card-head p {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.field-password {
+  position: relative;
+  display: block;
+}
+
+.field-password input {
+  padding-right: 70px;
+}
+
+.field-reveal {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+}
+
+.field-reveal:hover {
+  color: var(--accent-dark);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: none;
+}
+
+.login-submit {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 15px 18px;
+  font-size: 15px;
+}
+
+.login-card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.spinner {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 13px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  animation: shake 0.35s ease;
+}
+
+.alert-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.alert-error {
+  color: var(--danger);
+  background: rgba(229, 72, 77, 0.1);
+  border: 1px solid rgba(229, 72, 77, 0.22);
+}
+
+.alert-error .alert-dot {
+  background: var(--danger);
+}
+
+@keyframes shake {
+  10%, 90% { transform: translateX(-1px); }
+  30%, 70% { transform: translateX(3px); }
+  50% { transform: translateX(-3px); }
+}
+
+@media (max-width: 760px) {
+  .login-grid {
+    gap: 28px;
+    padding: 32px clamp(16px, 6vw, 32px);
+  }
 }
 
 .card {
@@ -137,7 +371,7 @@ h1, h2, h3 {
   text-align: left;
   cursor: pointer;
   width: 100%;
-  transition: background 0.25s ease, color 0.25s ease, transform 0.15s ease;
+  transition: background 0.25s ease, color 0.25s ease, transform 0.15s ease, box-shadow 0.25s ease;
 }
 
 .nav-item:hover {
@@ -146,10 +380,10 @@ h1, h2, h3 {
 }
 
 .nav-item.active {
-  background: linear-gradient(135deg, rgba(47, 158, 92, 0.22), rgba(255, 255, 255, 0.45));
+  background: linear-gradient(135deg, rgba(247, 148, 29, 0.22), rgba(255, 255, 255, 0.45));
   backdrop-filter: blur(6px);
   color: var(--accent-dark);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 4px 14px rgba(47, 158, 92, 0.18);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 4px 14px rgba(247, 148, 29, 0.18);
   transform: translateX(2px);
 }
 
@@ -161,18 +395,95 @@ h1, h2, h3 {
 }
 
 .topbar {
+  position: relative;
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 28px;
+  gap: 12px;
+  padding: clamp(12px, 2.5vw, 20px) clamp(16px, 4vw, 28px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.5);
   background: var(--surface);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
+  overflow: hidden;
+}
+
+/* A slow, subtle light sweep along the bottom edge - reads as "live" /
+   "fluid" the way a real POS terminal's status bar does, without being
+   distracting. */
+.topbar::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent) 50%, transparent);
+  background-size: 200% 100%;
+  opacity: 0.55;
+  animation: status-sweep 4s linear infinite;
+}
+
+@keyframes status-sweep {
+  0% { background-position: 160% 0; }
+  100% { background-position: -60% 0; }
+}
+
+.status-bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.status-pill {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(8px);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 0 0 rgba(31, 169, 113, 0.5);
+  animation: status-pulse 2s infinite;
+}
+
+@keyframes status-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(31, 169, 113, 0.45); }
+  70% { box-shadow: 0 0 0 6px rgba(31, 169, 113, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(31, 169, 113, 0); }
+}
+
+.status-clock {
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  letter-spacing: 0.02em;
+}
+
+@media (max-width: 760px) {
+  .status-bar {
+    order: 3;
+    width: 100%;
+    justify-content: space-between;
+  }
 }
 
 .topbar-greeting h2 {
-  font-size: 18px;
+  font-size: clamp(16px, 2.2vw, 18px);
 }
 
 .topbar-greeting p {
@@ -183,8 +494,9 @@ h1, h2, h3 {
 
 .content {
   flex: 1;
-  padding: 24px 28px;
+  padding: clamp(14px, 3vw, 24px) clamp(16px, 4vw, 28px);
   display: flex;
+  flex-wrap: wrap;
   gap: 20px;
   align-items: flex-start;
   min-width: 0;
@@ -221,7 +533,24 @@ input:focus, select:focus {
   box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
+/* Native <option> popups don't reliably inherit a <select>'s custom
+   colours across browsers - style them explicitly so the dropdown list
+   itself (not just the closed control) matches the current theme. */
+select option {
+  background: var(--surface-solid);
+  color: var(--text);
+}
+
+/* Exact hover effect from Uiverse.io by gharsh11032000: a blue circle
+   blooms from the center to fill the button, the ring shadow brightens,
+   and it scales down on click. Requires the button's content wrapped in
+   <span>label</span><span></span> (see JSX) - the growing circle is a
+   real element, not a pseudo-element, so it matches the source exactly. */
 button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 10px 18px;
   font-size: 14px;
   font-weight: 600;
@@ -230,21 +559,50 @@ button {
   background: var(--accent);
   color: white;
   cursor: pointer;
-  transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+  overflow: hidden;
+  transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+button span:first-child {
+  position: relative;
+  z-index: 1;
+}
+
+button span:last-child {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
+  background-color: #2196f3;
+  border-radius: 50%;
+  opacity: 0;
+  transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+  pointer-events: none;
 }
 
 button:hover {
-  background: var(--accent-dark);
-  box-shadow: 0 4px 14px rgba(47, 158, 92, 0.3);
+  box-shadow: 0 0 0 5px #2195f360;
+  color: #ffffff;
+}
+
+button:hover span:last-child {
+  /* Bigger than any button in the app so the fill always reaches every
+     edge, no matter how wide or narrow the button is - the button's own
+     overflow:hidden clips the excess, so oversizing costs nothing. */
+  width: 800px;
+  height: 800px;
+  opacity: 1;
 }
 
 button:active {
-  transform: scale(0.97);
+  scale: 0.95;
 }
 
 button:disabled {
-  background: rgba(111, 139, 124, 0.25);
-  color: rgba(111, 139, 124, 0.8);
+  background: rgba(140, 125, 105, 0.25);
+  color: rgba(140, 125, 105, 0.8);
   cursor: not-allowed;
   box-shadow: none;
 }
@@ -259,6 +617,15 @@ button.ghost {
 button.ghost:hover {
   background: rgba(255, 255, 255, 0.75);
   box-shadow: none;
+}
+
+/* Matches the theme toggle's footprint (56x28) so the pair reads as one unit. */
+.logout-btn {
+  height: 28px;
+  padding: 0 14px;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
 }
 
 button.danger {
@@ -316,80 +683,363 @@ button.pill.active {
   letter-spacing: 0.03em;
 }
 
-/* ---------- Product grid (POS / Inventory) ---------- */
+/* ---------- Item list (POS / Inventory) ---------- */
+/* Text-only rows, no thumbnails - optimized for fast scanning/tapping,
+   matching a real terminal (Toast, JCPenney POS) rather than a product
+   catalog grid. */
 
-.product-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 14px;
+.item-list {
   flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  overflow: hidden;
+}
+
+/* Filter pills live inside the card as a toolbar strip, so the card
+   itself starts at the same Y as the cart panel on the other side -
+   no separate row pushing one card lower than the other. */
+.item-list-toolbar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Grid, not flex - fixed column tracks keep meta/stock/price aligned
+   across rows regardless of how long a SKU or stock label is. */
+.item-row {
+  display: grid;
+  grid-template-columns: 1fr 130px 100px 80px;
+  align-items: center;
+  column-gap: 16px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.item-row.has-actions {
+  grid-template-columns: 1fr 130px 100px 80px auto;
+}
+
+.item-row:last-child {
+  border-bottom: none;
+}
+
+.item-row:hover {
+  background: var(--accent-soft);
+}
+
+.item-row.is-empty {
+  display: flex;
+  cursor: default;
+  color: var(--text-muted);
+  justify-content: center;
+}
+
+.item-main {
   min-width: 0;
 }
 
-.product-card {
+.item-main .name {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.item-main .description {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.item-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: right;
+}
+
+.item-price {
+  font-size: 14px;
+  font-weight: 700;
+  text-align: right;
+}
+
+.item-stock {
+  justify-self: center;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 999px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.item-stock.ok {
+  color: var(--success);
+  background: rgba(31, 169, 113, 0.14);
+}
+
+.item-stock.low {
+  color: var(--warning);
+  background: var(--warning-soft);
+}
+
+.item-stock.out {
+  color: var(--danger);
+  background: rgba(229, 72, 77, 0.12);
+}
+
+.item-actions {
+  display: flex;
+  gap: 6px;
+  justify-self: end;
+}
+
+.item-actions button {
+  padding: 6px 10px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* ---------- Section headings ---------- */
+/* Shared size/margin so headings that sit above a card (e.g. "Choose
+   Products") and headings that used to live inside one line up exactly. */
+
+.section-heading {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 16px;
+}
+
+/* ---------- Dashboard ---------- */
+
+.dashboard-container {
+  flex: 1;
+  min-width: 0;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.dashboard-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.dashboard-header h1 {
+  font-size: 24px;
+}
+
+.dashboard-header select {
+  width: auto;
+  margin-top: 0;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
   background: var(--surface);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: var(--radius-md);
-  padding: 12px;
+  padding: 20px;
   box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  cursor: pointer;
+}
+
+.stat-label {
+  display: block;
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.stat-value {
+  display: block;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.products-section {
+  background: var(--surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.products-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  gap: 12px;
 }
 
-.product-card:hover {
-  border-color: var(--accent);
-  transform: translateY(-3px);
-  box-shadow: 0 14px 30px rgba(22, 50, 35, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+.product-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-muted);
+  transition: background 0.2s ease;
 }
 
-/* Each product keeps its own accent hue on the thumbnail (assigned in JS
-   from the palette) - the shared UI chrome stays green/white, but every
-   item's "theme" is its own colour, per the reference. */
-.product-thumb {
-  height: 72px;
+.product-item:hover {
+  background: var(--accent-soft);
+}
+
+.product-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 180px;
+}
+
+.product-avatar {
+  width: 40px;
+  height: 40px;
   border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
   font-weight: 700;
   color: white;
-  box-shadow: inset 0 -10px 20px rgba(0, 0, 0, 0.12), inset 0 10px 16px rgba(255, 255, 255, 0.35);
+  flex-shrink: 0;
+  font-size: 16px;
 }
 
-.product-card .name {
-  font-size: 13px;
+.product-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.product-name {
   font-weight: 600;
+  color: var(--text);
+  overflow-wrap: anywhere;
 }
 
-.product-card .meta {
+.product-sku {
   font-size: 12px;
   color: var(--text-muted);
 }
 
-.product-card .price {
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.product-card .actions {
-  display: flex;
-  gap: 6px;
-  margin-top: 4px;
-}
-
-.product-card .actions button {
+.product-stats {
   flex: 1;
-  padding: 6px 8px;
-  font-size: 12px;
+  min-width: 200px;
+}
+
+.product-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.metric {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.metric-label {
+  color: var(--text-muted);
+}
+
+.metric-value {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 32px 0;
+  color: var(--text-muted);
+}
+
+.loading-state {
+  text-align: center;
+  padding: 40px 0;
+  color: var(--text-muted);
+}
+
+@media (max-width: 640px) {
+  .dashboard-header h1 {
+    font-size: 20px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .product-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .product-info,
+  .product-stats {
+    min-width: unset;
+  }
+
+  .product-metrics {
+    justify-content: space-between;
+  }
 }
 
 /* ---------- Cart / order panel ---------- */
+
+.cart-column {
+  width: 320px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.cart-column .panel {
+  width: 100%;
+}
 
 .panel {
   width: 320px;
@@ -473,4 +1123,137 @@ button.pill.active {
 .subtitle, .hint {
   color: var(--text-muted);
   font-size: 13px;
+}
+
+/* ---------- Theme switch ---------- */
+/* Toggle switch adapted from Uiverse.io by ErzenXz */
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 56px;
+  height: 28px;
+  margin: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.toggle-switch input[type="checkbox"] {
+  display: none;
+}
+
+.toggle-switch-background {
+  position: absolute;
+  inset: 0;
+  background-color: color-mix(in srgb, var(--text-muted) 35%, var(--surface-solid) 65%);
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 2px var(--border);
+  transition: background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.toggle-switch-handle {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 20px;
+  height: 20px;
+  background-color: #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.toggle-switch input[type="checkbox"]:checked + .toggle-switch-background {
+  background-color: var(--accent);
+  box-shadow: inset 0 0 0 2px var(--accent-dark);
+}
+
+.toggle-switch input[type="checkbox"]:checked + .toggle-switch-background .toggle-switch-handle {
+  transform: translateX(28px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2), 0 0 0 3px var(--accent-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toggle-switch-background,
+  .toggle-switch-handle {
+    transition-duration: 0s;
+  }
+}
+
+/* ---------- Responsive shell (tablet / phone) ---------- */
+
+@media (max-width: 960px) {
+  .cart-column {
+    width: 100%;
+  }
+}
+
+@media (max-width: 760px) {
+  .shell {
+    flex-direction: column;
+    min-height: 100dvh;
+  }
+
+  .sidebar {
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+  }
+
+  .nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px;
+    overflow-x: auto;
+  }
+
+  .nav-item {
+    width: auto;
+    white-space: nowrap;
+  }
+
+  .topbar-greeting p {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .content {
+    padding: 12px;
+    gap: 14px;
+  }
+
+  .item-row {
+    grid-template-columns: 1fr 90px 70px;
+    padding: 12px;
+    column-gap: 10px;
+  }
+
+  .item-row.has-actions {
+    grid-template-columns: 1fr;
+    row-gap: 8px;
+  }
+
+  .item-row.has-actions .item-meta,
+  .item-row.has-actions .item-stock {
+    justify-self: start;
+    text-align: left;
+  }
+
+  .item-row.has-actions .item-actions {
+    justify-self: stretch;
+  }
+
+  .item-meta {
+    display: none;
+  }
+
+  label {
+    font-size: 13px;
+  }
 }

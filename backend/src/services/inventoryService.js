@@ -39,7 +39,7 @@ class InventoryService {
   }
 
   // UC5: Manage Products - Add Product Variant
-  createProduct({ styleCode, productName, basePrice, sku, size, colour, unitPrice, quantityOnHand }) {
+  createProduct({ styleCode, productName, description, basePrice, sku, size, colour, unitPrice, quantityOnHand }) {
     if (this.productRepository.findVariantBySku(sku)) {
       throw new DuplicateSkuError(`SKU "${sku}" is already in use.`);
     }
@@ -52,6 +52,7 @@ class InventoryService {
       const specId = this.productRepository.insertSpec({
         styleCode,
         name: productName,
+        description,
         basePrice: basePrice ?? unitPrice,
       });
       spec = this.productRepository.findSpecByStyleCode(styleCode);

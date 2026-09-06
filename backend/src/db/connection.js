@@ -14,6 +14,7 @@ function createConnection(dbPath) {
   const schema = fs.readFileSync(path.join(__dirname, "schema.sql"), "utf8");
   db.exec(schema);
   migrateEmployeeIdentity(db);
+  migrateProductDescription(db);
 
   // node:sqlite has no built-in transaction() helper (unlike better-sqlite3);
   // wrap BEGIN/COMMIT/ROLLBACK so callers get the same atomic-transaction API.
@@ -55,6 +56,15 @@ function migrateEmployeeIdentity(db) {
      CREATE UNIQUE INDEX IF NOT EXISTS employees_email_unique ON employees(email);
      CREATE UNIQUE INDEX IF NOT EXISTS employees_number_unique ON employees(employee_number);`
   );
+}
+
+function migrateProductDescription(db) {
+  const columns = db.prepare("PRAGMA table_info(product_specifications)").all();
+  const names = new Set(columns.map((column) => column.name));
+
+  if (!names.has("description")) {
+    db.exec("ALTER TABLE product_specifications ADD COLUMN description TEXT");
+  }
 }
 
 const DEFAULT_DB_PATH = path.join(__dirname, "..", "..", "data", "pos.sqlite3");

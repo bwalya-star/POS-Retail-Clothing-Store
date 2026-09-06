@@ -2,16 +2,14 @@ import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../api/client";
 
-const PALETTE = ["#7c5cff", "#ff8a5c", "#26c0a1", "#5c9dff", "#ff5c8a", "#c05cff"];
-
-function colourFor(key) {
-  let hash = 0;
-  for (let i = 0; i < key.length; i++) hash = (hash * 31 + key.charCodeAt(i)) >>> 0;
-  return PALETTE[hash % PALETTE.length];
+function stockLevel(quantity) {
+  if (quantity <= 0) return "out";
+  if (quantity <= 5) return "low";
+  return "ok";
 }
 
 export default function POSTerminalPage() {
-  const { auth } = useAuth();
+  const { auth, logout } = useAuth();
   const [products, setProducts] = useState([]);
   const [category, setCategory] = useState("All");
   const [cart, setCart] = useState([]); // [{ variant, quantity }]
@@ -35,6 +33,10 @@ export default function POSTerminalPage() {
 
   function addToCart(variant) {
     setError("");
+    if (variant.quantity_on_hand < 1) {
+      setError(`${variant.sku} is out of stock.`);
+      return;
+    }
     setCart((prev) => {
       const existing = prev.find((line) => line.variant.id === variant.id);
       if (existing) {
@@ -45,10 +47,6 @@ export default function POSTerminalPage() {
         return prev.map((line) =>
           line.variant.id === variant.id ? { ...line, quantity: line.quantity + 1 } : line
         );
-      }
-      if (variant.quantity_on_hand < 1) {
-        setError(`${variant.sku} is out of stock.`);
-        return prev;
       }
       return [...prev, { variant, quantity: 1 }];
     });
@@ -79,13 +77,17 @@ export default function POSTerminalPage() {
     setError("");
     try {
       const sale = await api.processSale(auth.token, {
-        registerId: 1,
+        registerId: auth.registerId,
         lineItems: cart.map((line) => ({ sku: line.variant.sku, quantity: line.quantity })),
         payment: { amount: Number(paymentAmount), method: "cash" },
       });
       setReceipt(sale);
       setPhase("done");
     } catch (err) {
+      if (err.status === 401) {
+        logout();
+        return;
+      }
       setError(err.message);
     }
   }
@@ -126,24 +128,66 @@ export default function POSTerminalPage() {
   return (
     <>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <h1>Choose Products</h1>
-        <div className="row">
-          {categories.map((c) => (
-            <button
-              key={c}
-              className={`pill ${category === c ? "active" : ""}`}
-              onClick={() => setCategory(c)}
-            >
-              {c}
-            </button>
-          ))}
-        </div>
+        <h2 className="section-heading">Choose Products</h2>
 
-        <div className="product-grid">
-          {visibleProducts.map((v) => (
-            <div key={v.id} className="product-card" onClick={() => addToCart(v)}>
-              <div className="product-thumb" style={{ background: colourFor(v.sku) }}>
-                {v.product_name.charAt(0)}
+        <div className="item-list">
+          <div className="item-list-toolbar">
+            {categories.map((c) => (
+              <button
+                key={c}
+                className={`pill ${category === c ? "active" : ""}`}
+                onClick={() => setCategory(c)}
+              >
+                <span>{c}</span>
+                <span></span>
+              </button>
+            ))}
+          </div>
+          {visibleProducts.length === 0 && <div className="item-row is-empty">No products in this category.</div>}
+          {visibleProducts.map((v) => {
+            const level = stockLevel(v.quantity_on_hand);
+            return (
+              <div
+                key={v.id}
+                className="item-row"
+                onClick={() => addToCart(v)}
+                style={level === "out" ? { opacity: 0.5, cursor: "not-allowed" } : undefined}
+              >
+                <div className="item-main">
+                  <div className="name">{v.product_name}</div>
+                  {v.description && <div className="description">{v.description}</div>}
+                </div>
+                <div className="item-meta">{v.sku}<br />{v.size} / {v.colour}</div>
+                <span className={`item-stock ${level}`}>
+                  {level === "out" ? "Out of stock" : level === "low" ? `${v.quantity_on_hand} left` : "In stock"}
+                </span>
+                <div className="item-price">${v.unit_price.toFixed(2)}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="cart-column">
+        <h2 className="section-heading">Current Sale</h2>
+        <div className="panel">
+          {cart.length === 0 && <p className="hint">Click an item to add it to the sale.</p>}
+          {cart.map((line) => (
+            <div className="cart-line" key={line.variant.id}>
+              <div>
+                <div>{line.variant.product_name}</div>
+                <div className="meta">{line.variant.sku} &middot; ${line.variant.unit_price.toFixed(2)}</div>
+              </div>
+              <div className="qty-controls">
+                <button className="ghost" onClick={() => changeQuantity(line.variant.id, -1)}>
+                  <span>-</span>
+                  <span></span>
+                </button>
+                <span>{line.quantity}</span>
+                <button className="ghost" onClick={() => changeQuantity(line.variant.id, 1)}>
+                  <span>+</span>
+                  <span></span>
+                </button>
               </div>
               <div className="name">{v.product_name}</div>
               <div className="meta">{v.sku}</div>
@@ -151,8 +195,6 @@ export default function POSTerminalPage() {
               <div className="price">K{v.unit_price.toFixed(2)}</div>
             </div>
           ))}
-        </div>
-      </div>
 
       <div className="panel">
         <h2>Current Sale</h2>
@@ -171,35 +213,15 @@ export default function POSTerminalPage() {
           </div>
         ))}
 
-        {error && <p className="error">{error}</p>}
+          <div className="summary-row total">
+            <span>Total</span>
+            <span>${total.toFixed(2)}</span>
+          </div>
 
         <div className="summary-row total">
           <span>Total</span>
           <span>K{total.toFixed(2)}</span>
         </div>
-
-        {phase === "shopping" && (
-          <button disabled={cart.length === 0} onClick={() => setPhase("paying")}>
-            Payment
-          </button>
-        )}
-
-        {phase === "paying" && (
-          <>
-            <label>Amount Tendered
-              <input value={paymentAmount} readOnly />
-            </label>
-            <div className="keypad">
-              {["7","8","9","4","5","6","1","2","3",".","0","C"].map((k) => (
-                <button key={k} onClick={() => pressKey(k)}>{k}</button>
-              ))}
-            </div>
-            <div className="row">
-              <button className="ghost" onClick={() => setPhase("shopping")}>Back</button>
-              <button disabled={!paymentAmount} onClick={completeSale}>Complete Sale</button>
-            </div>
-          </>
-        )}
       </div>
     </>
   );

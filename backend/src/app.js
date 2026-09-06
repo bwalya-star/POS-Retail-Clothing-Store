@@ -29,6 +29,7 @@ function createApp(db) {
   const salesReportService = new SalesReportService(saleRepository);
 
   const app = express();
+  app.locals.db = db;
   app.use(cors());
   app.use(express.json());
 
