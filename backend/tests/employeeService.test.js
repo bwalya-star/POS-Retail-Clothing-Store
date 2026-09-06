@@ -117,6 +117,7 @@ describe("EmployeeService (UC4)", () => {
       requestingAdminId: superAdminId,
     });
     expect(updated.role).toBe("manager");
+
     expect(() => employeeService.assignRole({
       employeeId: 999999,
       role: "manager",

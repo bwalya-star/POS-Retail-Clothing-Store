@@ -16,7 +16,12 @@ function seed() {
      DELETE FROM product_specifications;
      DELETE FROM employees;
      DELETE FROM registers;
-     DELETE FROM stores;`
+     DELETE FROM stores;
+     DELETE FROM sqlite_sequence WHERE name IN (
+       'stock_adjustments', 'payments', 'sales_line_items', 'sales',
+       'customers', 'product_variants', 'product_specifications',
+       'employees', 'registers', 'stores'
+     );`
   );
 
   const storeId = db
@@ -51,14 +56,14 @@ function seed() {
   }
 
   const specs = [
-    { styleCode: "TSH-001", name: "Classic T-Shirt", basePrice: 15.0 },
-    { styleCode: "JNS-001", name: "Slim Fit Jeans", basePrice: 35.0 },
-    { styleCode: "JKT-001", name: "Denim Jacket", basePrice: 55.0 },
+    { styleCode: "TSH-001", name: "Classic T-Shirt", description: "Soft cotton crew neck, everyday fit.", basePrice: 15.0 },
+    { styleCode: "JNS-001", name: "Slim Fit Jeans", description: "Stretch denim, tapered leg.", basePrice: 35.0 },
+    { styleCode: "JKT-001", name: "Denim Jacket", description: "Mid-weight trucker jacket, button front.", basePrice: 55.0 },
   ];
   const insertSpec = db.prepare(
-    "INSERT INTO product_specifications (style_code, name, base_price) VALUES (?, ?, ?)"
+    "INSERT INTO product_specifications (style_code, name, description, base_price) VALUES (?, ?, ?, ?)"
   );
-  const specIds = specs.map((s) => insertSpec.run(s.styleCode, s.name, s.basePrice).lastInsertRowid);
+  const specIds = specs.map((s) => insertSpec.run(s.styleCode, s.name, s.description, s.basePrice).lastInsertRowid);
 
   const variants = [
     { specIdx: 0, sku: "TSH-001-S-BLK", size: "S", colour: "Black", price: 15.0, qty: 20 },
@@ -76,6 +81,141 @@ function seed() {
   for (const v of variants) {
     insertVariant.run(specIds[v.specIdx], v.sku, v.size, v.colour, v.price, v.qty);
   }
+
+    // Dummy sales for sales dashboard testing
+
+  const cashierId = db
+    .prepare(
+      "SELECT id FROM employees WHERE role = ?"
+    )
+    .get("cashier").id;
+
+  const productRows = db
+    .prepare(`
+      SELECT id, sku, unit_price
+      FROM product_variants
+      ORDER BY id
+    `)
+    .all();
+
+  const insertSale = db.prepare(`
+    INSERT INTO sales (
+      register_id,
+      cashier_id,
+      date_time,
+      total_amount
+    )
+    VALUES (?, ?, ?, ?)
+  `);
+
+  const insertLineItem = db.prepare(`
+    INSERT INTO sales_line_items (
+      sale_id,
+      product_variant_id,
+      quantity,
+      subtotal
+    )
+    VALUES (?, ?, ?, ?)
+  `);
+
+  const insertPayment = db.prepare(`
+    INSERT INTO payments (
+      sale_id,
+      amount,
+      method,
+      change_due
+    )
+    VALUES (?, ?, ?, ?)
+  `);
+
+  function addSale({ date, productIndex, quantity }) {
+    const product = productRows[productIndex];
+
+    const subtotal = Number(
+      (product.unit_price * quantity).toFixed(2)
+    );
+
+    const saleId = insertSale.run(
+      registerId,
+      cashierId,
+      date,
+      subtotal
+    ).lastInsertRowid;
+
+    insertLineItem.run(
+      saleId,
+      product.id,
+      quantity,
+      subtotal
+    );
+
+    insertPayment.run(
+      saleId,
+      subtotal,
+      "cash",
+      0
+    );
+
+    console.log(
+      `  Sale #${saleId}: ${product.sku} x${quantity} = $${subtotal}`
+    );
+  }
+
+  // TODAY
+  addSale({
+    date: new Date().toISOString(),
+    productIndex: 0,
+    quantity: 3,
+  });
+
+  addSale({
+    date: new Date().toISOString(),
+    productIndex: 1,
+    quantity: 2,
+  });
+
+  // THIS WEEK
+  addSale({
+    date: new Date(
+      Date.now() - 2 * 24 * 60 * 60 * 1000
+    ).toISOString(),
+    productIndex: 0,
+    quantity: 5,
+  });
+
+  addSale({
+    date: new Date(
+      Date.now() - 4 * 24 * 60 * 60 * 1000
+    ).toISOString(),
+    productIndex: 1,
+    quantity: 4,
+  });
+
+  // THIS MONTH
+  addSale({
+    date: new Date(
+      Date.now() - 10 * 24 * 60 * 60 * 1000
+    ).toISOString(),
+    productIndex: 0,
+    quantity: 8,
+  });
+
+  addSale({
+    date: new Date(
+      Date.now() - 15 * 24 * 60 * 60 * 1000
+    ).toISOString(),
+    productIndex: 1,
+    quantity: 6,
+  });
+
+  // OLDER THAN ONE MONTH
+  addSale({
+    date: new Date(
+      Date.now() - 45 * 24 * 60 * 60 * 1000
+    ).toISOString(),
+    productIndex: 0,
+    quantity: 10,
+  });
 
   console.log("Seed complete:");
   console.log("  Store:", storeId, "Register:", registerId);

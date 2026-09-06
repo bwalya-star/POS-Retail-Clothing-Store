@@ -1,18 +1,23 @@
 import { useState } from "react";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { ThemeProvider } from "./context/ThemeContext";
 import AppShell from "./components/AppShell";
 import LoginPage from "./pages/LoginPage";
 import POSTerminalPage from "./pages/POSTerminalPage";
 import InventoryPage from "./pages/InventoryPage";
 import EmployeesPage from "./pages/EmployeesPage";
+import DashboardPage from "./pages/DashboardPage";
 
 const NAV_BY_ROLE = {
   cashier: [{ key: "pos", label: "POS" }],
   manager: [
+    { key: "dashboard", label: "Dashboard" },
+    { key: "pos", label: "POS" },
     { key: "inventory", label: "Inventory" },
     { key: "employees", label: "Employees" },
   ],
   superadmin: [
+    { key: "dashboard", label: "Dashboard" },
     { key: "pos", label: "POS" },
     { key: "inventory", label: "Inventory" },
     { key: "employees", label: "Employees" },
@@ -20,6 +25,7 @@ const NAV_BY_ROLE = {
 };
 
 const PAGES = {
+  dashboard: DashboardPage,
   pos: POSTerminalPage,
   inventory: InventoryPage,
   employees: EmployeesPage,
@@ -46,8 +52,10 @@ function Root() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <Root />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <Root />
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

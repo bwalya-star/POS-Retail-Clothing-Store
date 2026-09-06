@@ -38,16 +38,26 @@ export const api = {
       body: { name, email, employeeNumber, password, role },
     }),
   listEmployees: (token) => request("/employees", { token }),
-  updateEmployeeDetails: (token, employeeId, details) =>
+  updateEmployeeDetails: (token, employeeId, { name, email }) =>
     request(`/employees/${employeeId}/details`, {
       method: "PATCH",
       token,
-      body: details,
+      body: { name, email },
     }),
   assignRole: (token, employeeId, role) =>
     request(`/employees/${employeeId}/role`, {
       method: "PATCH",
       token,
       body: { role },
+    }),
+
+  getSalesSummary: (token, period) =>
+    request(`/reports/summary?period=${period}`, {
+      token,
+    }),
+
+  getTopSellers: (token, period, limit = 5) =>
+    request(`/reports/top-sellers?period=${period}&limit=${limit}`, {
+      token,
     }),
 };
