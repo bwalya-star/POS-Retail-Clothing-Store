@@ -124,10 +124,7 @@ export default function EmployeesPage() {
               <option key={role} value={role}>{roleLabel(role)}</option>
             ))}
           </select>
-          <button type="submit">
-            <span>Onboard</span>
-            <span></span>
-          </button>
+          <button type="submit">Onboard</button>
         </form>
         {message && <p className="success">{message}</p>}
         {error && <p className="error">{error}</p>}
