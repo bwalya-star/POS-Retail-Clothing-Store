@@ -22,6 +22,30 @@ It is designed to streamline retail operations including sales, inventory manage
 
 ---
 
+## Getting Started (Construction Iteration 1)
+
+Implements Login, Process Sale, and Restock Inventory (UC1-UC3) end-to-end: Node/Express + `node:sqlite` backend, React (Vite) frontend.
+
+```bash
+# Backend
+cd backend
+npm install
+npm run seed   # creates demo store, employees, and product variants
+npm run dev    # starts API on http://localhost:4000
+npm test       # runs the Jest unit test suite
+
+# Frontend (separate terminal)
+cd frontend
+npm install
+npm run dev    # starts the app, printed URL (e.g. http://localhost:5173)
+```
+
+Demo accounts (created by `npm run seed`): `cashier/cashier123`, `manager/manager123`, `admin/admin123`.
+
+Requires Node.js >= 22.5 (uses the built-in `node:sqlite` module, no native build step needed).
+
+---
+
 ## Credits
 
 **Team Members and Roles:**  
