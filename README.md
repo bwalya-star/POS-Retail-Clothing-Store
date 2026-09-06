@@ -8,10 +8,17 @@ It is designed to streamline retail operations including sales, inventory manage
 
 ## Table of Contents
 
+### Inception
 - [Inception Report](docs/inception_report.md)  
 - [Problem Statement](docs/problem_statement.md)  
 - [Risk And Feasibility Study](docs/risk_and_feasibility.md)   
 - [High Level Requirements](docs/high_level_requirements.md)   
+
+### Elaboration – Iteration 1
+- [Detailed Use Cases (30%)](docs/detailed_use_cases.md)
+- [System Sequence Diagrams](docs/system_sequence_diagrams.md)
+- [Domain Model](docs/domain_model.md)
+- [Architectural Proof-of-Concept](docs/architecture.md)
 
 ---
 
