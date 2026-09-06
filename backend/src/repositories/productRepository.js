@@ -51,6 +51,55 @@ class ProductRepository {
       .run(productVariantId, managerId, quantityChanged, reason, timestamp);
     return result.lastInsertRowid;
   }
+
+  findSpecByStyleCode(styleCode) {
+    return this.db
+      .prepare("SELECT * FROM product_specifications WHERE style_code = ?")
+      .get(styleCode);
+  }
+
+  insertSpec({ styleCode, name, basePrice }) {
+    const result = this.db
+      .prepare(
+        "INSERT INTO product_specifications (style_code, name, base_price) VALUES (?, ?, ?)"
+      )
+      .run(styleCode, name, basePrice);
+    return result.lastInsertRowid;
+  }
+
+  insertVariant({ productSpecificationId, sku, size, colour, unitPrice, quantityOnHand }) {
+    const result = this.db
+      .prepare(
+        `INSERT INTO product_variants
+         (product_specification_id, sku, size, colour, unit_price, quantity_on_hand)
+         VALUES (?, ?, ?, ?, ?, ?)`
+      )
+      .run(productSpecificationId, sku, size, colour, unitPrice, quantityOnHand);
+    return result.lastInsertRowid;
+  }
+
+  updateVariant(id, { size, colour, unitPrice }) {
+    this.db
+      .prepare(
+        "UPDATE product_variants SET size = ?, colour = ?, unit_price = ? WHERE id = ?"
+      )
+      .run(size, colour, unitPrice, id);
+  }
+
+  deleteVariant(id) {
+    this.db.prepare("DELETE FROM product_variants WHERE id = ?").run(id);
+  }
+
+  hasHistory(variantId) {
+    const saleRef = this.db
+      .prepare("SELECT 1 FROM sales_line_items WHERE product_variant_id = ? LIMIT 1")
+      .get(variantId);
+    if (saleRef) return true;
+    const adjustmentRef = this.db
+      .prepare("SELECT 1 FROM stock_adjustments WHERE product_variant_id = ? LIMIT 1")
+      .get(variantId);
+    return Boolean(adjustmentRef);
+  }
 }
 
 module.exports = ProductRepository;

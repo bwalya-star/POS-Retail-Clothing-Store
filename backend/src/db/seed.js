@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const bcrypt = require("bcryptjs");
 const { getConnection } = require("./connection");
 
@@ -63,6 +65,141 @@ function seed() {
   for (const v of variants) {
     insertVariant.run(specIds[v.specIdx], v.sku, v.size, v.colour, v.price, v.qty);
   }
+
+    // Dummy sales for sales dashboard testing
+
+  const cashierId = db
+    .prepare(
+      "SELECT id FROM employees WHERE username = ?"
+    )
+    .get("cashier").id;
+
+  const productRows = db
+    .prepare(`
+      SELECT id, sku, unit_price
+      FROM product_variants
+      ORDER BY id
+    `)
+    .all();
+
+  const insertSale = db.prepare(`
+    INSERT INTO sales (
+      register_id,
+      cashier_id,
+      date_time,
+      total_amount
+    )
+    VALUES (?, ?, ?, ?)
+  `);
+
+  const insertLineItem = db.prepare(`
+    INSERT INTO sales_line_items (
+      sale_id,
+      product_variant_id,
+      quantity,
+      subtotal
+    )
+    VALUES (?, ?, ?, ?)
+  `);
+
+  const insertPayment = db.prepare(`
+    INSERT INTO payments (
+      sale_id,
+      amount,
+      method,
+      change_due
+    )
+    VALUES (?, ?, ?, ?)
+  `);
+
+  function addSale({ date, productIndex, quantity }) {
+    const product = productRows[productIndex];
+
+    const subtotal = Number(
+      (product.unit_price * quantity).toFixed(2)
+    );
+
+    const saleId = insertSale.run(
+      registerId,
+      cashierId,
+      date,
+      subtotal
+    ).lastInsertRowid;
+
+    insertLineItem.run(
+      saleId,
+      product.id,
+      quantity,
+      subtotal
+    );
+
+    insertPayment.run(
+      saleId,
+      subtotal,
+      "cash",
+      0
+    );
+
+    console.log(
+      `  Sale #${saleId}: ${product.sku} x${quantity} = $${subtotal}`
+    );
+  }
+
+  // TODAY
+  addSale({
+    date: new Date().toISOString(),
+    productIndex: 0,
+    quantity: 3,
+  });
+
+  addSale({
+    date: new Date().toISOString(),
+    productIndex: 1,
+    quantity: 2,
+  });
+
+  // THIS WEEK
+  addSale({
+    date: new Date(
+      Date.now() - 2 * 24 * 60 * 60 * 1000
+    ).toISOString(),
+    productIndex: 0,
+    quantity: 5,
+  });
+
+  addSale({
+    date: new Date(
+      Date.now() - 4 * 24 * 60 * 60 * 1000
+    ).toISOString(),
+    productIndex: 1,
+    quantity: 4,
+  });
+
+  // THIS MONTH
+  addSale({
+    date: new Date(
+      Date.now() - 10 * 24 * 60 * 60 * 1000
+    ).toISOString(),
+    productIndex: 0,
+    quantity: 8,
+  });
+
+  addSale({
+    date: new Date(
+      Date.now() - 15 * 24 * 60 * 60 * 1000
+    ).toISOString(),
+    productIndex: 1,
+    quantity: 6,
+  });
+
+  // OLDER THAN ONE MONTH
+  addSale({
+    date: new Date(
+      Date.now() - 45 * 24 * 60 * 60 * 1000
+    ).toISOString(),
+    productIndex: 0,
+    quantity: 10,
+  });
 
   console.log("Seed complete:");
   console.log("  Store:", storeId, "Register:", registerId);

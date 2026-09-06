@@ -37,7 +37,12 @@ class AuthService {
     this.employeeRepository.resetFailedAttempts(employee.id);
 
     const token = jwt.sign(
-      { sub: employee.id, role: employee.role, name: employee.name },
+      {
+        sub: employee.id,
+        role: employee.role,
+        name: employee.name,
+        storeId: employee.store_id,
+      },
       JWT_SECRET,
       { expiresIn: JWT_EXPIRY }
     );
