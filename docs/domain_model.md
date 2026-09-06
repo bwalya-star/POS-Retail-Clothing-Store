@@ -1,10 +1,13 @@
-# Domain Model – POS Retail Clothing Store
+# Domain Model & Design Class Diagram – POS Retail Clothing Store
 
-**UP Phase:** Elaboration – Iteration 1
+**UP Phase:** Elaboration Phase  
+**Methodology:** Unified Process (Larman, *Applying UML and Patterns*)
 
-Per Larman, the Domain Model is a visualization of **conceptual classes** in the problem domain — it contains no operations/methods and is not a software design. Classes below were identified by noun-phrase analysis of the [Problem Statement](problem_statement.md) and the [Detailed Use Cases](detailed_use_cases.md).
+Per the Unified Process, the **Domain Model** visualizes conceptual classes in the problem domain, while the **Design Class Diagram (DCD)** bridges domain concepts to software design contracts (methods, parameters, visibility, and navigability).
 
-## Conceptual Class Diagram
+---
+
+## 1. Conceptual Domain Model
 
 ```mermaid
 classDiagram
@@ -18,19 +21,27 @@ classDiagram
     class Employee {
         employeeID
         name
+        username
+        passwordHash
         role
+        isActive
     }
     class Cashier
     class StoreManager
     class SuperAdmin {
-        <<has access to all roles>>
+        <<has full system access>>
     }
     class Sale {
+        saleID
         dateTime
         totalAmount
+        taxAmount
+        status
     }
     class SalesLineItem {
+        lineItemID
         quantity
+        unitPrice
         subtotal
     }
     class ProductSpecification {
@@ -46,22 +57,28 @@ classDiagram
         quantityOnHand
     }
     class Payment {
+        paymentID
         amount
         method
+        paymentDate
     }
     class Customer {
         customerID
         name
-        contactInfo
+        phone
+        email
     }
     class StockAdjustment {
+        adjustmentID
         quantityChanged
         timestamp
         reason
     }
     class SalesReport {
-        periodStart
-        periodEnd
+        startDate
+        endDate
+        totalRevenue
+        totalSalesCount
     }
 
     Employee <|-- Cashier
@@ -80,15 +97,83 @@ classDiagram
     StoreManager "1" -- "0..*" StockAdjustment : authorizes
     StockAdjustment "*" -- "1" ProductVariant : adjusts
     Sale "0..*" --> "1" SalesReport : aggregated-in
-    SuperAdmin "1" -- "0..*" Employee : onboards & assigns role to
+    SuperAdmin "1" -- "0..*" Employee : onboards & manages
 ```
 
-## Notes on Key Conceptual Classes
+---
 
-- **ProductSpecification vs. ProductVariant** — Larman's original POS model has a single `ProductSpecification`. A clothing store needs the extra `ProductVariant` layer because stock, price, and SKU are tracked per *size + colour* combination of a style, not per style alone.
-- **Sale / SalesLineItem / Payment** — kept identical in spirit to Larman's canonical POS domain model; this is the same transaction pattern (Sale is a whole, SalesLineItems are its parts, Payment closes it).
-- **StockAdjustment** — new concept (not in Larman's original) needed to support the Restock and future Returns use cases, and to provide an audit trail for inventory changes.
-- **Employee generalization** — `Cashier`, `StoreManager`, `SuperAdmin` share identity/role attributes but have different permissions, motivating a role hierarchy rather than a single flat `User` class.
-- **SuperAdmin** — a single, most-privileged role with access to every capability of every other role (Cashier and StoreManager included), and the *sole* actor responsible for onboarding new employees and assigning their role. This centralizes account provisioning, which is a deliberate trade-off: simpler access control at the cost of a single point of failure (see the updated Risk List in [Risk and Feasibility](risk_and_feasibility.md)).
+## 2. Software Design Class Diagram (DCD)
 
-This model will be refined into a **Design Class Diagram** (with methods, visibility, and navigability) in Elaboration Iteration 2, once responsibilities are assigned via GRASP patterns against the SSDs above.
+The DCD illustrates the software components, method signatures, visibility (`+` public, `-` private), and repository dependencies derived from GRASP pattern assignments:
+
+```mermaid
+classDiagram
+    class AuthService {
+        +login(username, password) SessionToken
+        +validateToken(token) UserSession
+        +hashPassword(plainText) String
+    }
+
+    class SaleService {
+        +createSale(cashierId, customerId) Sale
+        +addSaleItem(saleId, sku, quantity) LineItemResult
+        +completeSale(saleId, paymentAmount, paymentMethod) SaleResult
+        +getSaleById(saleId) Sale
+    }
+
+    class InventoryService {
+        +getProductBySku(sku) ProductVariant
+        +restockItem(sku, quantity, managerId) StockResult
+        +createProductVariant(variantData) ProductVariant
+        +listInventory(filters) List~ProductVariant~
+    }
+
+    class EmployeeService {
+        +onboardEmployee(employeeData) Employee
+        +updateEmployeeRole(employeeId, newRole) Employee
+        +deactivateEmployee(employeeId) Boolean
+        +getAllEmployees() List~Employee~
+    }
+
+    class SalesReportService {
+        +generateReport(startDate, endDate) ReportSummary
+    }
+
+    class SaleRepository {
+        +saveSale(saleData) Int
+        +saveLineItem(saleId, lineItem) Boolean
+        +savePayment(paymentData) Boolean
+        +getSalesReport(startDate, endDate) Object
+    }
+
+    class ProductRepository {
+        +findBySku(sku) ProductVariant
+        +updateStock(sku, quantityDelta) Boolean
+        +createVariant(variantData) Boolean
+        +findAll(options) List
+    }
+
+    class EmployeeRepository {
+        +findByUsername(username) Employee
+        +findById(id) Employee
+        +create(employeeData) Employee
+        +updateRole(id, role) Boolean
+        +softDelete(id) Boolean
+    }
+
+    AuthService --> EmployeeRepository
+    EmployeeService --> EmployeeRepository
+    SaleService --> SaleRepository
+    SaleService --> ProductRepository
+    InventoryService --> ProductRepository
+    SalesReportService --> SaleRepository
+```
+
+---
+
+## 3. GRASP Pattern Mapping
+
+- **Controller:** `SaleService`, `InventoryService`, `AuthService`, and `EmployeeService` act as application controllers receiving system operations from Express route handlers.
+- **Creator:** `SaleService` creates `Sale` and `SalesLineItem` instances; `InventoryService` creates `StockAdjustment` records.
+- **High Cohesion:** Database interactions are strictly encapsulated in Repository classes (`SaleRepository`, `ProductRepository`, `EmployeeRepository`).
+- **Low Coupling:** Service classes interact with repositories via plain domain objects, isolating persistence details from UI presentation handlers.
