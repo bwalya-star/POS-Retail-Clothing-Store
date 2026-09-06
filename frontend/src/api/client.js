@@ -24,4 +24,17 @@ export const api = {
     request("/inventory/restock", { method: "POST", token, body: { sku, quantity } }),
   processSale: (token, { registerId, lineItems, payment }) =>
     request("/sales", { method: "POST", token, body: { registerId, lineItems, payment } }),
+  onboardEmployee: (token, { name, username, password, role }) =>
+    request("/employees", {
+      method: "POST",
+      token,
+      body: { name, username, password, role },
+    }),
+  listEmployees: (token) => request("/employees", { token }),
+  assignRole: (token, employeeId, role) =>
+    request(`/employees/${employeeId}/role`, {
+      method: "PATCH",
+      token,
+      body: { role },
+    }),
 };
