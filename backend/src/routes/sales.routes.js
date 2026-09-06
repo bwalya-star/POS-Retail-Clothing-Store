@@ -35,6 +35,7 @@ function buildSalesRouter(saleService) {
       if (err instanceof UnderpaymentError) {
         return res.status(400).json({ error: err.message });
       }
+      console.error("POST /api/sales failed:", err);
       return res.status(500).json({ error: "Failed to process sale." });
     }
   });
