@@ -8,12 +8,12 @@ function buildAuthRouter(authService) {
   const router = express.Router();
 
   router.post("/login", (req, res) => {
-    const { username, password } = req.body || {};
-    if (!username || !password) {
-      return res.status(400).json({ error: "username and password are required." });
+    const { email, password } = req.body || {};
+    if (!email || !password) {
+      return res.status(400).json({ error: "email and password are required." });
     }
     try {
-      const result = authService.login(username, password);
+      const result = authService.login(email, password);
       return res.json(result);
     } catch (err) {
       if (err instanceof InvalidCredentialsError) {

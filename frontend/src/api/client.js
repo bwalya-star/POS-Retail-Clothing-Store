@@ -54,7 +54,7 @@ async function request(path, { method = "GET", body, token } = {}) {
 }
 
 export const api = {
-  login: (username, password) => request("/auth/login", { method: "POST", body: { username, password } }),
+  login: (email, password) => request("/auth/login", { method: "POST", body: { email, password } }),
   listInventory: (token) => request("/inventory", { token }),
   restock: (token, sku, quantity) =>
     request("/inventory/restock", { method: "POST", token, body: { sku, quantity } }),

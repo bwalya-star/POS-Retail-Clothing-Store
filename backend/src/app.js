@@ -36,9 +36,13 @@ function createApp(db) {
   app.use("/api/auth", buildAuthRouter(authService));
   app.use("/api/employees", buildEmployeesRouter(employeeService));
   app.use("/api/sales", buildSalesRouter(saleService));
+<<<<<<< HEAD
   app.use("/api/inventory", buildInventoryRouter(inventoryService, productRepository));
   app.use("/api/reports", buildReportsRouter(salesReportService));
   
+=======
+  app.use("/api/inventory", buildInventoryRouter(inventoryService));
+>>>>>>> 7afd5a9c4f889c8bffa21472ae20ef3fdbb5561b
 
   return app;
 }

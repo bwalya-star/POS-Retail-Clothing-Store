@@ -12,13 +12,17 @@ function makeTestDb() {
     .run(storeId).lastInsertRowid;
 
   const insertEmployee = db.prepare(
-    "INSERT INTO employees (store_id, username, password_hash, name, role) VALUES (?, ?, ?, ?, ?)"
+    `INSERT INTO employees
+     (store_id, email, employee_number, government_name, username, password_hash, name, role)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
   );
   const cashierId = insertEmployee.run(
-    storeId, "cashier", bcrypt.hashSync("cashier123", 10), "Test Cashier", "cashier"
+    storeId, "grace.mulenga@test.local", "TEST-0001", "Grace Mulenga", "grace.mulenga@test.local",
+    bcrypt.hashSync("cashier123", 10), "Grace Mulenga", "cashier"
   ).lastInsertRowid;
   const managerId = insertEmployee.run(
-    storeId, "manager", bcrypt.hashSync("manager123", 10), "Test Manager", "manager"
+    storeId, "brian.phiri@test.local", "TEST-0002", "Brian Phiri", "brian.phiri@test.local",
+    bcrypt.hashSync("manager123", 10), "Brian Phiri", "manager"
   ).lastInsertRowid;
 
   const specId = db

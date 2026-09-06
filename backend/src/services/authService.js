@@ -14,10 +14,10 @@ class AuthService {
   }
 
   // UC1: Login
-  login(username, password) {
-    const employee = this.employeeRepository.findByUsername(username);
+  login(email, password) {
+    const employee = this.employeeRepository.findByEmail(email);
     if (!employee) {
-      throw new InvalidCredentialsError("Invalid username or password.");
+      throw new InvalidCredentialsError("Invalid email or password.");
     }
 
     if (!employee.is_active) {
@@ -31,7 +31,7 @@ class AuthService {
       if (updated.failed_login_attempts >= MAX_FAILED_ATTEMPTS) {
         this.employeeRepository.deactivate(employee.id);
       }
-      throw new InvalidCredentialsError("Invalid username or password.");
+      throw new InvalidCredentialsError("Invalid email or password.");
     }
 
     this.employeeRepository.resetFailedAttempts(employee.id);
@@ -40,14 +40,18 @@ class AuthService {
       {
         sub: employee.id,
         role: employee.role,
+<<<<<<< HEAD
         name: employee.name,
+=======
+        name: employee.government_name,
+>>>>>>> 7afd5a9c4f889c8bffa21472ae20ef3fdbb5561b
         storeId: employee.store_id,
       },
       JWT_SECRET,
       { expiresIn: JWT_EXPIRY }
     );
 
-    return { token, role: employee.role, name: employee.name };
+    return { token, role: employee.role, name: employee.government_name };
   }
 }
 

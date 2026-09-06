@@ -3,7 +3,7 @@ import { useAuth } from "../context/AuthContext";
 
 export default function LoginPage() {
   const { login } = useAuth();
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -13,7 +13,7 @@ export default function LoginPage() {
     setError("");
     setSubmitting(true);
     try {
-      await login(username, password);
+      await login(email, password);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -28,8 +28,8 @@ export default function LoginPage() {
         <p className="subtitle">Sign in to continue</p>
 
         <label>
-          Username
-          <input value={username} onChange={(e) => setUsername(e.target.value)} autoFocus />
+          Email
+          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoFocus />
         </label>
         <label>
           Password
@@ -43,7 +43,8 @@ export default function LoginPage() {
         </button>
 
         <p className="hint">
-          Demo accounts: cashier/cashier123, manager/manager123, superadmin/superadmin123
+          Demo accounts: grace.mulenga@pos.local/cashier123, brian.phiri@pos.local/manager123,
+          dorn.banda@pos.local/superadmin123
         </p>
       </form>
     </div>

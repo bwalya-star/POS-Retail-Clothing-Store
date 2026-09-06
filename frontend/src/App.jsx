@@ -34,14 +34,13 @@ const PAGES = {
 
 function MainApp() {
   const { auth } = useAuth();
-
   const navItems = NAV_BY_ROLE[auth.role] || [];
+
+  const Page = PAGES[activeKey];
 
   const [activeKey, setActiveKey] = useState(
     navItems[0]?.key
   );
-
-  const Page = PAGES[activeKey];
 
   return (
     <AppShell
