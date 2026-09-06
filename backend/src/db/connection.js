@@ -13,6 +13,7 @@ function createConnection(dbPath) {
 
   const schema = fs.readFileSync(path.join(__dirname, "schema.sql"), "utf8");
   db.exec(schema);
+  migrateEmployeeIdentity(db);
 
   // node:sqlite has no built-in transaction() helper (unlike better-sqlite3);
   // wrap BEGIN/COMMIT/ROLLBACK so callers get the same atomic-transaction API.
@@ -31,6 +32,29 @@ function createConnection(dbPath) {
   };
 
   return db;
+}
+
+function migrateEmployeeIdentity(db) {
+  const columns = db.prepare("PRAGMA table_info(employees)").all();
+  const names = new Set(columns.map((column) => column.name));
+
+  if (!names.has("email")) db.exec("ALTER TABLE employees ADD COLUMN email TEXT");
+  if (!names.has("employee_number")) {
+    db.exec("ALTER TABLE employees ADD COLUMN employee_number TEXT");
+  }
+  if (!names.has("government_name")) {
+    db.exec("ALTER TABLE employees ADD COLUMN government_name TEXT");
+  }
+
+  db.exec(
+    `UPDATE employees
+     SET email = COALESCE(email, username || '@local.invalid'),
+         employee_number = COALESCE(employee_number, 'LEGACY-' || id),
+         government_name = COALESCE(government_name, name)
+     WHERE email IS NULL OR employee_number IS NULL OR government_name IS NULL;
+     CREATE UNIQUE INDEX IF NOT EXISTS employees_email_unique ON employees(email);
+     CREATE UNIQUE INDEX IF NOT EXISTS employees_number_unique ON employees(employee_number);`
+  );
 }
 
 const DEFAULT_DB_PATH = path.join(__dirname, "..", "..", "data", "pos.sqlite3");

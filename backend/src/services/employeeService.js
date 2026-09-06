@@ -3,7 +3,9 @@ const bcrypt = require("bcryptjs");
 const VALID_ROLES = ["cashier", "manager", "superadmin"];
 const MIN_PASSWORD_LENGTH = 8;
 
-class UsernameTakenError extends Error {}
+class EmailTakenError extends Error {}
+class EmployeeNumberTakenError extends Error {}
+class InvalidEmployeeDetailsError extends Error {}
 class InvalidRoleError extends Error {}
 class WeakPasswordError extends Error {}
 class EmployeeNotFoundError extends Error {}
@@ -15,7 +17,7 @@ class EmployeeService {
     this.employeeRepository = employeeRepository;
   }
 
-  onboardEmployee({ name, username, password, role, storeId }) {
+  onboardEmployee({ name, email, employeeNumber, password, role, storeId }) {
     if (!VALID_ROLES.includes(role)) {
       throw new InvalidRoleError(
         `Role must be one of: ${VALID_ROLES.join(", ")}.`
@@ -28,17 +30,26 @@ class EmployeeService {
       );
     }
 
-    const existing = this.employeeRepository.findByUsername(username);
+    const existing = this.employeeRepository.findByEmail(email);
     if (existing) {
-      throw new UsernameTakenError(`Username "${username}" is already taken.`);
+      throw new EmailTakenError(`Email "${email}" is already registered.`);
     }
+
+    const requestedNumber = employeeNumber?.trim();
+    if (requestedNumber && this.employeeRepository.findByEmployeeNumber(requestedNumber)) {
+      throw new EmployeeNumberTakenError(
+        `Employee number "${requestedNumber}" is already in use.`
+      );
+    }
+    employeeNumber = requestedNumber || this.employeeRepository.getNextEmployeeNumber();
 
     const passwordHash = bcrypt.hashSync(password, 10);
     const employeeId = this.employeeRepository.insert({
       storeId,
-      username,
-      passwordHash,
+      email,
+      employeeNumber,
       name,
+      passwordHash,
       role,
     });
 
@@ -81,6 +92,21 @@ class EmployeeService {
     return this.employeeRepository.findById(employeeId);
   }
 
+  updateDetails({ employeeId, name, email }) {
+    const employee = this.employeeRepository.findById(employeeId);
+    if (!employee) {
+      throw new EmployeeNotFoundError(`No employee found with id ${employeeId}.`);
+    }
+    if (!name || !email) {
+      throw new InvalidEmployeeDetailsError("Name and email are required.");
+    }
+    if (this.employeeRepository.findByEmailExcludingId(email, employeeId)) {
+      throw new EmailTakenError(`Email "${email}" is already registered.`);
+    }
+    this.employeeRepository.updateDetails(employeeId, name, email);
+    return this.employeeRepository.findById(employeeId);
+  }
+
   listEmployees() {
     return this.employeeRepository.listAll();
   }
@@ -88,10 +114,12 @@ class EmployeeService {
 
 module.exports = {
   EmployeeService,
-  UsernameTakenError,
+  EmailTakenError,
+  EmployeeNumberTakenError,
   InvalidRoleError,
   WeakPasswordError,
   EmployeeNotFoundError,
   SelfDemotionError,
   LastSuperAdminError,
+  InvalidEmployeeDetailsError,
 };

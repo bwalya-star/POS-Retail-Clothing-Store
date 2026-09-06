@@ -5,12 +5,22 @@ import { roleLabel } from "../roleLabels";
 
 const ROLES = ["cashier", "manager", "superadmin"];
 
+function nextEmployeeNumber(employees) {
+  const highest = employees.reduce((max, employee) => {
+    const match = /^EMP-(\d+)$/.exec(employee.employee_number || "");
+    return match ? Math.max(max, Number(match[1])) : max;
+  }, 0);
+  return `EMP-${String(highest + 1).padStart(4, "0")}`;
+}
+
 export default function EmployeesPage() {
   const { auth } = useAuth();
   const [employees, setEmployees] = useState([]);
-  const [form, setForm] = useState({ name: "", username: "", password: "", role: "cashier" });
+  const [form, setForm] = useState({ name: "", email: "", employeeNumber: "", password: "", role: "cashier" });
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [editingId, setEditingId] = useState(null);
+  const [editForm, setEditForm] = useState({ name: "", email: "" });
 
   async function loadEmployees() {
     const list = await api.listEmployees(auth.token);
@@ -28,8 +38,8 @@ export default function EmployeesPage() {
     setMessage("");
     try {
       const employee = await api.onboardEmployee(auth.token, form);
-      setMessage(`${employee.username} onboarded as ${roleLabel(employee.role)}.`);
-      setForm({ name: "", username: "", password: "", role: "cashier" });
+      setMessage(`${employee.email} onboarded as ${roleLabel(employee.role)}.`);
+      setForm({ name: "", email: "", employeeNumber: "", password: "", role: "cashier" });
       loadEmployees();
     } catch (err) {
       setError(err.message);
@@ -48,6 +58,26 @@ export default function EmployeesPage() {
     }
   }
 
+  function startEditing(employee) {
+    setEditingId(employee.id);
+    setEditForm({ name: employee.name, email: employee.email });
+    setError("");
+    setMessage("");
+  }
+
+  async function saveDetails(employeeId) {
+    setError("");
+    setMessage("");
+    try {
+      await api.updateEmployeeDetails(auth.token, employeeId, editForm);
+      setEditingId(null);
+      setMessage("Employee details updated.");
+      loadEmployees();
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
   return (
     <div style={{ flex: 1, minWidth: 0 }}>
       <h1>Manage Employees</h1>
@@ -56,14 +86,21 @@ export default function EmployeesPage() {
         <h2>Onboard Employee</h2>
         <form className="row" onSubmit={handleOnboard}>
           <input
-            placeholder="Name"
+            placeholder="Full name"
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
           />
           <input
-            placeholder="Username"
-            value={form.username}
-            onChange={(e) => setForm({ ...form, username: e.target.value })}
+            type="email"
+            placeholder="Email"
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+          />
+          <input
+            value={form.employeeNumber || nextEmployeeNumber(employees)}
+            aria-label="Generated employee ID"
+            onChange={(e) => setForm({ ...form, employeeNumber: e.target.value })}
+            placeholder="Employee ID"
           />
           <input
             type="password"
@@ -87,7 +124,8 @@ export default function EmployeesPage() {
         <thead>
           <tr>
             <th>Name</th>
-            <th>Username</th>
+            <th>Email</th>
+            <th>Employee ID</th>
             <th>Role</th>
             <th>Status</th>
             <th>Change Role</th>
@@ -96,19 +134,29 @@ export default function EmployeesPage() {
         <tbody>
           {employees.map((employee) => (
             <tr key={employee.id}>
-              <td>{employee.name}</td>
-              <td>{employee.username}</td>
+              <td>{editingId === employee.id ? (
+                <input value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
+              ) : employee.name}</td>
+              <td>{editingId === employee.id ? (
+                <input type="email" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} />
+              ) : employee.email}</td>
+              <td>{employee.employee_number}</td>
               <td>{roleLabel(employee.role)}</td>
               <td>{employee.is_active ? "Active" : "Disabled"}</td>
               <td>
-                <select
-                  value={employee.role}
-                  onChange={(e) => handleRoleChange(employee.id, e.target.value)}
-                >
-                  {ROLES.map((role) => (
-                    <option key={role} value={role}>{roleLabel(role)}</option>
-                  ))}
-                </select>
+                {editingId === employee.id ? (
+                  <div className="row">
+                    <button type="button" onClick={() => saveDetails(employee.id)}>Save</button>
+                    <button type="button" className="ghost" onClick={() => setEditingId(null)}>Cancel</button>
+                  </div>
+                ) : (
+                  <div className="row">
+                    <select value={employee.role} onChange={(e) => handleRoleChange(employee.id, e.target.value)}>
+                      {ROLES.map((role) => <option key={role} value={role}>{roleLabel(role)}</option>)}
+                    </select>
+                    <button type="button" className="ghost" onClick={() => startEditing(employee)}>Edit</button>
+                  </div>
+                )}
               </td>
             </tr>
           ))}

@@ -8,7 +8,10 @@ import EmployeesPage from "./pages/EmployeesPage";
 
 const NAV_BY_ROLE = {
   cashier: [{ key: "pos", label: "POS" }],
-  manager: [{ key: "inventory", label: "Inventory" }],
+  manager: [
+    { key: "inventory", label: "Inventory" },
+    { key: "employees", label: "Employees" },
+  ],
   superadmin: [
     { key: "pos", label: "POS" },
     { key: "inventory", label: "Inventory" },

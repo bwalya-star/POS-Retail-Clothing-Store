@@ -18,7 +18,7 @@ async function request(path, { method = "GET", body, token } = {}) {
 }
 
 export const api = {
-  login: (username, password) => request("/auth/login", { method: "POST", body: { username, password } }),
+  login: (email, password) => request("/auth/login", { method: "POST", body: { email, password } }),
   listInventory: (token) => request("/inventory", { token }),
   restock: (token, sku, quantity) =>
     request("/inventory/restock", { method: "POST", token, body: { sku, quantity } }),
@@ -29,13 +29,19 @@ export const api = {
     request(`/inventory/${encodeURIComponent(sku)}`, { method: "DELETE", token }),
   processSale: (token, { registerId, lineItems, payment }) =>
     request("/sales", { method: "POST", token, body: { registerId, lineItems, payment } }),
-  onboardEmployee: (token, { name, username, password, role }) =>
+  onboardEmployee: (token, { name, email, employeeNumber, password, role }) =>
     request("/employees", {
       method: "POST",
       token,
-      body: { name, username, password, role },
+      body: { name, email, employeeNumber, password, role },
     }),
   listEmployees: (token) => request("/employees", { token }),
+  updateEmployeeDetails: (token, employeeId, details) =>
+    request(`/employees/${employeeId}/details`, {
+      method: "PATCH",
+      token,
+      body: details,
+    }),
   assignRole: (token, employeeId, role) =>
     request(`/employees/${employeeId}/role`, {
       method: "PATCH",
