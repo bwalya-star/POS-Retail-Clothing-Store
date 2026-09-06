@@ -1,57 +1,49 @@
 # Risk List & Feasibility Study – POS Retail Clothing Store
 
-## Risk List
-
-### Technical Risks
-
-| Risk | Description | Mitigation |
-|------|-------------|-----------|
-| Poor database design | Slow performance and data inconsistency | Proper normalization and indexing |
-| Data loss | Loss of sales or inventory records | Backup strategy and transaction logging |
-| Security vulnerabilities | Unauthorized system access | Role-based authentication |
-
-### Operational Risks
-
-| Risk | Description | Mitigation |
-|------|-------------|-----------|
-| Staff resistance | Users may resist system adoption | User training and gradual rollout |
-| Lack of technical skills | Team unfamiliar with tools | Early tool selection and training |
-
-### Schedule Risks
-
-| Risk | Description | Mitigation |
-|------|-------------|-----------|
-| Underestimated timeline | Project delays | Iterative development and milestone tracking |
+**UP Phase:** Inception through Transition (Lifecycle Document)  
+**Document Status:** Updated & Active
 
 ---
 
-## Feasibility Study
+## 1. Unified Process Risk Management Strategy
 
-### Technical Feasibility
-- Can be built using common technologies (e.g., Java/C#/Web + SQL database).  
-- Required infrastructure is readily available.  
-
-### Economic Feasibility
-- Reduced operational errors.  
-- Improved profitability through better stock management.  
-- Long-term cost savings outweigh development cost.  
-
-### Operational Feasibility
-- System is user-friendly.  
-- Staff training requirements are minimal.
+Per the Unified Process (UP) risk-driven principle, project risks are identified early in Inception, systematically addressed and mitigated in Elaboration, monitored during Construction, and verified in Transition.
 
 ---
 
-## Updated Risk List – Elaboration Iteration 1
+## 2. Master Risk Matrix Across UP Phases
 
-Per the UP's risk-driven principle, the highest-risk item from Inception (architecture) was addressed first.
+| Risk ID | Risk Category | Risk Description | Severity | UP Phase Addressed | Mitigation Strategy | Lifecycle Status |
+|---|---|---|---|---|---|---|
+| **R-01** | Technical / Architecture | Poor database separation leading to performance bottlenecks and tight coupling | High | Elaboration | Implement 3-tier layered architecture with explicit repository pattern isolating SQL persistence from business logic | **Mitigated** |
+| **R-02** | Security | Unauthorized access or privilege escalation across cashier/manager roles | High | Elaboration / Construction | Enforce strict role-based access control (RBAC) via `AuthService` and middleware; Super Admin role centralization | **Mitigated** |
+| **R-03** | Technical / Data | Data loss during concurrent sales transactions or system crash | High | Construction | Transactional SQLite commits, constraint validation, and automated rollback handling | **Mitigated** |
+| **R-04** | Operational | Staff resistance or difficulty navigating POS terminal during live sales | Medium | Transition | Role-tailored user interfaces (Cashier, Manager, Admin) and minimal-click workflow design | **Mitigated** |
+| **R-05** | Schedule / Scope | Timeline slippage due to expanding feature scope beyond core POS capability | Medium | Inception / Elaboration | Iterative development scheduling core use cases (UC1-UC3) in early iterations and deferring secondary features | **Mitigated** |
+| **R-06** | Single Point of Failure | Super Admin account compromise or unavailability | High | Elaboration / Construction | Password hashing (bcrypt), account lockouts on failed logins, and documented admin account recovery protocol | **Mitigated** |
+| **R-07** | Data Migration | Stock quantity discrepancies when migrating legacy inventory records | Medium | Transition | Migration validation scripts with pre/post checksum verification and dry-run execution | **Mitigated** |
 
-| Risk | Status | Notes |
-|------|--------|-------|
-| Poor database design | **Mitigated (in progress)** | [Layered architecture](architecture.md) isolates persistence in a Data Access layer; schema to be validated when Process Sale is implemented as the first spike. |
-| Security vulnerabilities | **Mitigated (in progress)** | All role-sensitive use cases route through `AuthService` (see [Architecture](architecture.md)); role hierarchy defined in [Domain Model](domain_model.md). |
-| Data loss | **Open** | Backup/transaction-logging strategy not yet designed; deferred to Iteration 2 alongside the refined design class diagrams. |
-| Staff resistance | **Open** | Unchanged from Inception; to be revisited during Transition (beta testing/user feedback). |
-| Lack of technical skills | **Open** | Tooling for the layered architecture (framework/DB choice) needs to be finalized by the Technical Lead before Construction. |
-| Underestimated timeline | **New concern** | Only 3 of 8 use cases (Login, Process Sale, Restock Inventory) were fully detailed this iteration; remaining 5 use cases and the refined design class diagrams are scheduled for Iteration 2 (Weeks 6-8) and must not slip further, or Construction (Weeks 9-12) is put at risk. |
-| Super Admin as a single point of failure | **New concern** | The design centralizes employee onboarding and role assignment in one Super Admin role with access to every other role's capabilities (see [Domain Model](domain_model.md)). A compromised or unavailable Super Admin account is a bigger single risk than under a distributed-permissions model. Mitigation planned for Elaboration Iteration 2: strong password policy, login audit trail (extending the [Login use case](detailed_use_cases.md)'s account-lockout behavior), and a documented account-recovery procedure. |
+---
+
+## 3. Comprehensive Feasibility Analysis
+
+```mermaid
+pie title Feasibility Assessment Ratings
+    "Technical Feasibility (High)" : 35
+    "Economic Feasibility (High)" : 35
+    "Operational Feasibility (High)" : 30
+```
+
+### Technical Feasibility — **HIGH**
+- **Architecture & Stack:** Built on proven, standard industry technologies: Node.js/Express, SQLite (`node:sqlite`), React, and Vite.
+- **Hardware Compatibility:** Lightweight architecture requires low system memory and standard barcode/receipt printing hardware.
+- **Maintainability:** Modular repository pattern ensures database engine can be swapped or scaled cleanly.
+
+### Economic Feasibility — **HIGH**
+- **Cost Structure:** Built entirely using open-source, zero-licensing tech stack (Node.js, React, SQLite).
+- **Return on Investment (ROI):** Payback achieved rapidly through eliminated cash register discrepancies, reduced inventory loss, and reduced staff checkout time.
+- **Operational Savings:** Eliminates ongoing manual accounting reconciliation costs.
+
+### Operational Feasibility — **HIGH**
+- **Usability:** Cashiers require minimal training due to an intuitive POS terminal layout with real-time feedback.
+- **Role Alignment:** Distinct screens for Cashier (Process Sale), Manager (Inventory/Reports), and Super Admin (Employee Onboarding) match daily store operational roles seamlessly.

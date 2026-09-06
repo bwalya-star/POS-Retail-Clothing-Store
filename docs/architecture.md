@@ -1,79 +1,106 @@
-# Architectural Proof-of-Concept – POS Retail Clothing Store
+# Architectural Proof-of-Concept & Baseline – POS Retail Clothing Store
 
-**UP Phase:** Elaboration – Iteration 1
+**UP Phase:** Elaboration Phase  
+**Milestone:** Lifecycle Architecture Baseline (LCA)
 
-Per the [Inception Report](inception_report.md), the system commits to a **3-tier layered architecture**. This document elaborates that commitment into a concrete proof-of-concept, addressing the highest architectural risk identified in the [Risk List](risk_and_feasibility.md): poor separation of concerns leading to slow, inconsistent, hard-to-test code.
+---
 
-## Layered Architecture
+## 1. Architectural Overview & 3-Tier Layering
+
+The system follows a strict **3-Tier Layered Architecture** separating **Presentation**, **Domain / Application**, and **Data Access** concerns. This design directly mitigates high-priority technical risks: poor database performance, security breaches, and untestable business logic.
 
 ```mermaid
 flowchart TB
-    subgraph Presentation["Presentation Layer"]
-        UI1[POS Terminal UI]
-        UI2[Manager Dashboard UI]
-        UI3[Super Admin UI]
+    subgraph Presentation["Presentation Layer (React + Vite)"]
+        UI1["POS Terminal Page (`POSTerminalPage.jsx`)"]
+        UI2["Inventory Page (`InventoryPage.jsx`)"]
+        UI3["Employees Page (`EmployeesPage.jsx`)"]
+        UI4["Reports Page (`ManagerPage.jsx`)"]
+        UI5["Login Page (`LoginPage.jsx`)"]
     end
 
-    subgraph Domain["Domain / Application Layer"]
-        SaleSvc[SaleService]
-        InvSvc[InventoryService]
-        RptSvc[ReportingService]
-        AuthSvc[AuthService]
-        EmpSvc[EmployeeService]
-        DM[Domain Model: Sale, SalesLineItem,\nProductVariant, Payment, Employee, ...]
+    subgraph API_Routes["API Routing & Security Middleware"]
+        R1["`/api/sales`"]
+        R2["`/api/inventory`"]
+        R3["`/api/employees`"]
+        R4["`/api/reports`"]
+        R5["`/api/auth`"]
+        MW["Auth & Role Middleware (`requireAuth`, `requireRole`)"]
     end
 
-    subgraph DataAccess["Data Access Layer"]
-        SaleRepo[SaleRepository]
-        ProductRepo[ProductRepository]
-        EmpRepo[EmployeeRepository]
+    subgraph Domain["Domain / Application Layer (Node.js Services)"]
+        SaleSvc["`SaleService`"]
+        InvSvc["`InventoryService`"]
+        RptSvc["`SalesReportService`"]
+        AuthSvc["`AuthService`"]
+        EmpSvc["`EmployeeService`"]
     end
 
-    DB[(SQL Database)]
+    subgraph DataAccess["Data Access Layer (Repositories & SQLite)"]
+        SaleRepo["`SaleRepository`"]
+        ProductRepo["`ProductRepository`"]
+        EmpRepo["`EmployeeRepository`"]
+        DB[(SQLite Database - `pos.sqlite3`)]
+    end
 
-    UI1 --> SaleSvc
-    UI1 --> AuthSvc
-    UI2 --> InvSvc
-    UI2 --> RptSvc
-    UI3 --> EmpSvc
-    UI3 --> AuthSvc
+    UI1 --> R1
+    UI2 --> R2
+    UI3 --> R3
+    UI4 --> R4
+    UI5 --> R5
 
-    SaleSvc --> DM
-    InvSvc --> DM
-    RptSvc --> DM
-    EmpSvc --> DM
+    R1 --> MW --> SaleSvc
+    R2 --> MW --> InvSvc
+    R3 --> MW --> EmpSvc
+    R4 --> MW --> RptSvc
+    R5 --> AuthSvc
 
     SaleSvc --> SaleRepo
+    SaleSvc --> ProductRepo
     InvSvc --> ProductRepo
-    RptSvc --> SaleRepo
     EmpSvc --> EmpRepo
     AuthSvc --> EmpRepo
+    RptSvc --> SaleRepo
 
     SaleRepo --> DB
     ProductRepo --> DB
     EmpRepo --> DB
 ```
 
-## Layer Responsibilities
+---
 
-| Layer | Responsibility | Depends on |
+## 2. Layer Responsibilities & Design Rules
+
+| Layer | Component Scope | Design Rules & Responsibilities |
 |---|---|---|
-| **Presentation** | Renders screens per role (Cashier, Manager, Super Admin); captures input; contains no business rules. | Domain/Application layer only |
-| **Domain / Application** | Implements use-case logic (`processSale`, `restockItem`, `authenticate`, `generateReport`) and holds the domain model (Sale, ProductVariant, Employee, etc.). | Data Access layer only |
-| **Data Access** | Translates domain objects to/from persistent storage (repositories/DAOs); isolates SQL from business logic. | Database only |
+| **Presentation** | React components (`src/pages`, `src/context`) | Handles UI rendering, user interaction, client state (`AuthContext`, `ThemeContext`), and calls HTTP client API endpoints. Contains zero business logic or SQL statements. |
+| **API / Middleware** | Express routes & middleware (`backend/src/routes`, `middleware`) | Intercepts HTTP requests, validates request payloads, executes `requireRole(...)` authentication/authorization middleware, and forwards calls to application services. |
+| **Domain / Application** | Services (`backend/src/services`) | Implements core use-case logic (`processSale`, `restockItem`, `authenticate`, `onboardEmployee`, `generateReport`). Orchestrates business transaction boundaries and rule enforcement. |
+| **Data Access** | Repositories (`backend/src/repositories`) | Encapsulates database persistence operations (`node:sqlite`). Translates raw SQL rows into domain structures. Isolates SQL queries from services. |
+| **Persistence Layer** | Relational Database (`backend/data/pos.sqlite3`) | Stores normalized relational tables: `employees`, `product_specifications`, `product_variants`, `sales`, `sales_line_items`, `payments`, `customers`, and `stock_adjustments`. |
 
-## Why This Layering Addresses the Top Risk
+---
 
-- **Poor database design / performance risk** (from the risk list) is contained to the Data Access layer — schema or query changes do not ripple into UI or business logic.
-- **Security vulnerabilities risk** is addressed by routing all role-sensitive operations (Manager/Super Admin screens) through `AuthService` before reaching the Domain layer. `AuthService` grants the Super Admin role every permission granted to Cashier and Store Manager, and reserves employee onboarding/role assignment (`EmployeeService`) exclusively for Super Admin.
-- **Testability**: the Domain/Application layer can be unit-tested against the Data Access layer's repository interfaces without a UI or live database, supporting the Construction phase's test-case requirements.
+## 3. Comprehensive REST API Endpoints Specification
 
-## Mapping to Use Cases
+| Method | Endpoint Path | Target Service | Allowed Roles | Description |
+|---|---|---|---|---|
+| `POST` | `/api/auth/login` | `AuthService` | Public | Authenticate employee credentials; returns session token & role |
+| `POST` | `/api/sales` | `SaleService` | `cashier`, `manager`, `superadmin` | Process and record a completed sale atomically |
+| `GET` | `/api/inventory` | `InventoryService` | All Roles | Fetch list of product variants, prices, and quantities on hand |
+| `POST` | `/api/inventory/restock` | `InventoryService` | `manager`, `superadmin` | Adjust stock quantity received and record audit log |
+| `POST` | `/api/inventory/products` | `InventoryService` | `manager`, `superadmin` | Add new product variant (style, SKU, size, color, price) |
+| `GET` | `/api/employees` | `EmployeeService` | `superadmin` | Retrieve complete list of store employees |
+| `POST` | `/api/employees` | `EmployeeService` | `superadmin` | Onboard new employee with role credentials |
+| `PATCH` | `/api/employees/:id/role` | `EmployeeService` | `superadmin` | Change role assignment for existing employee |
+| `DELETE` | `/api/employees/:id` | `EmployeeService` | `superadmin` | Soft delete employee account (`is_active = 0`) |
+| `GET` | `/api/reports/sales` | `SalesReportService` | `manager`, `superadmin` | Generate aggregated sales analytics and summary totals |
 
-| Use Case | Primary Service | Primary Repository |
-|---|---|---|
-| Login (UC1) | AuthService | EmployeeRepository |
-| Process Sale (UC2) | SaleService | SaleRepository, ProductRepository |
-| Manage Inventory – Restock (UC3) | InventoryService | ProductRepository |
+---
 
-This proof-of-concept will be validated by implementing UC2 (Process Sale) end-to-end through all three layers as the first Construction-phase spike, since it is the highest-value, highest-traffic use case.
+## 4. Architectural Proof-of-Concept Spike Verification
+
+The architectural proof-of-concept verified that:
+1. **Vertical Integration:** A request initiated from `POSTerminalPage` accurately hits `/api/sales`, passes `requireAuth` middleware, triggers `saleService.processSale()`, executes SQL transactions via `saleRepository`, and updates `productRepository` stock levels atomically.
+2. **Security Isolation:** Route middleware rejects requests lacking valid authorization headers or targeting endpoints above the user's role privilege.
+3. **Testability:** Unit tests (`saleService.test.js`, `authService.test.js`, `inventoryService.test.js`, `employeeService.test.js`) verify domain services using isolated mock repositories without requiring live UI interaction.
