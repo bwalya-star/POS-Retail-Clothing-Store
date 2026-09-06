@@ -4,6 +4,7 @@ const cors = require("cors");
 const EmployeeRepository = require("./repositories/employeeRepository");
 const ProductRepository = require("./repositories/productRepository");
 const SaleRepository = require("./repositories/saleRepository");
+const {SalesReportService} = require("./services/salesReportService");
 
 const { AuthService } = require("./services/authService");
 const { EmployeeService } = require("./services/employeeService");
@@ -14,6 +15,7 @@ const buildAuthRouter = require("./routes/auth.routes");
 const buildEmployeesRouter = require("./routes/employees.routes");
 const buildSalesRouter = require("./routes/sales.routes");
 const buildInventoryRouter = require("./routes/inventory.routes");
+const buildReportsRouter = require("./routes/reports.routes");
 
 function createApp(db) {
   const employeeRepository = new EmployeeRepository(db);
@@ -24,6 +26,7 @@ function createApp(db) {
   const employeeService = new EmployeeService(employeeRepository);
   const saleService = new SaleService(db, saleRepository, productRepository);
   const inventoryService = new InventoryService(productRepository);
+  const salesReportService = new SalesReportService(saleRepository);
 
   const app = express();
   app.use(cors());
@@ -33,7 +36,13 @@ function createApp(db) {
   app.use("/api/auth", buildAuthRouter(authService));
   app.use("/api/employees", buildEmployeesRouter(employeeService));
   app.use("/api/sales", buildSalesRouter(saleService));
+<<<<<<< HEAD
+  app.use("/api/inventory", buildInventoryRouter(inventoryService, productRepository));
+  app.use("/api/reports", buildReportsRouter(salesReportService));
+  
+=======
   app.use("/api/inventory", buildInventoryRouter(inventoryService));
+>>>>>>> 7afd5a9c4f889c8bffa21472ae20ef3fdbb5561b
 
   return app;
 }

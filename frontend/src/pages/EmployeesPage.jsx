@@ -5,6 +5,14 @@ import { roleLabel } from "../roleLabels";
 
 const ROLES = ["cashier", "manager", "superadmin"];
 
+<<<<<<< HEAD
+export default function EmployeesPage() {
+  const { auth } = useAuth();
+  const [employees, setEmployees] = useState([]);
+  const [form, setForm] = useState({ name: "", username: "", password: "", role: "cashier" });
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+=======
 function nextEmployeeNumber(employees) {
   const highest = employees.reduce((max, employee) => {
     const match = /^EMP-(\d+)$/.exec(employee.employee_number || "");
@@ -21,6 +29,7 @@ export default function EmployeesPage() {
   const [error, setError] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({ name: "", email: "" });
+>>>>>>> 7afd5a9c4f889c8bffa21472ae20ef3fdbb5561b
 
   async function loadEmployees() {
     const list = await api.listEmployees(auth.token);
@@ -38,8 +47,13 @@ export default function EmployeesPage() {
     setMessage("");
     try {
       const employee = await api.onboardEmployee(auth.token, form);
+<<<<<<< HEAD
+      setMessage(`${employee.username} onboarded as ${roleLabel(employee.role)}.`);
+      setForm({ name: "", username: "", password: "", role: "cashier" });
+=======
       setMessage(`${employee.email} onboarded as ${roleLabel(employee.role)}.`);
       setForm({ name: "", email: "", employeeNumber: "", password: "", role: "cashier" });
+>>>>>>> 7afd5a9c4f889c8bffa21472ae20ef3fdbb5561b
       loadEmployees();
     } catch (err) {
       setError(err.message);
@@ -58,6 +72,8 @@ export default function EmployeesPage() {
     }
   }
 
+<<<<<<< HEAD
+=======
   function startEditing(employee) {
     setEditingId(employee.id);
     setEditForm({ name: employee.name, email: employee.email });
@@ -78,6 +94,7 @@ export default function EmployeesPage() {
     }
   }
 
+>>>>>>> 7afd5a9c4f889c8bffa21472ae20ef3fdbb5561b
   return (
     <div style={{ flex: 1, minWidth: 0 }}>
       <h1>Manage Employees</h1>
@@ -86,11 +103,20 @@ export default function EmployeesPage() {
         <h2>Onboard Employee</h2>
         <form className="row" onSubmit={handleOnboard}>
           <input
+<<<<<<< HEAD
+            placeholder="Name"
+=======
             placeholder="Full name"
+>>>>>>> 7afd5a9c4f889c8bffa21472ae20ef3fdbb5561b
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
           />
           <input
+<<<<<<< HEAD
+            placeholder="Username"
+            value={form.username}
+            onChange={(e) => setForm({ ...form, username: e.target.value })}
+=======
             type="email"
             placeholder="Email"
             value={form.email}
@@ -101,6 +127,7 @@ export default function EmployeesPage() {
             aria-label="Generated employee ID"
             onChange={(e) => setForm({ ...form, employeeNumber: e.target.value })}
             placeholder="Employee ID"
+>>>>>>> 7afd5a9c4f889c8bffa21472ae20ef3fdbb5561b
           />
           <input
             type="password"
@@ -124,8 +151,12 @@ export default function EmployeesPage() {
         <thead>
           <tr>
             <th>Name</th>
+<<<<<<< HEAD
+            <th>Username</th>
+=======
             <th>Email</th>
             <th>Employee ID</th>
+>>>>>>> 7afd5a9c4f889c8bffa21472ae20ef3fdbb5561b
             <th>Role</th>
             <th>Status</th>
             <th>Change Role</th>
@@ -134,6 +165,21 @@ export default function EmployeesPage() {
         <tbody>
           {employees.map((employee) => (
             <tr key={employee.id}>
+<<<<<<< HEAD
+              <td>{employee.name}</td>
+              <td>{employee.username}</td>
+              <td>{roleLabel(employee.role)}</td>
+              <td>{employee.is_active ? "Active" : "Disabled"}</td>
+              <td>
+                <select
+                  value={employee.role}
+                  onChange={(e) => handleRoleChange(employee.id, e.target.value)}
+                >
+                  {ROLES.map((role) => (
+                    <option key={role} value={role}>{roleLabel(role)}</option>
+                  ))}
+                </select>
+=======
               <td>{editingId === employee.id ? (
                 <input value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
               ) : employee.name}</td>
@@ -157,6 +203,7 @@ export default function EmployeesPage() {
                     <button type="button" className="ghost" onClick={() => startEditing(employee)}>Edit</button>
                   </div>
                 )}
+>>>>>>> 7afd5a9c4f889c8bffa21472ae20ef3fdbb5561b
               </td>
             </tr>
           ))}

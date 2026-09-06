@@ -40,7 +40,11 @@ class AuthService {
       {
         sub: employee.id,
         role: employee.role,
+<<<<<<< HEAD
+        name: employee.name,
+=======
         name: employee.government_name,
+>>>>>>> 7afd5a9c4f889c8bffa21472ae20ef3fdbb5561b
         storeId: employee.store_id,
       },
       JWT_SECRET,
