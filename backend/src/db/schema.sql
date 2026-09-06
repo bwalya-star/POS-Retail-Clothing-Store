@@ -14,6 +14,9 @@ CREATE TABLE IF NOT EXISTS registers (
 CREATE TABLE IF NOT EXISTS employees (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   store_id INTEGER NOT NULL REFERENCES stores(id),
+  email TEXT,
+  employee_number TEXT,
+  government_name TEXT,
   username TEXT NOT NULL UNIQUE,
   password_hash TEXT NOT NULL,
   name TEXT NOT NULL,

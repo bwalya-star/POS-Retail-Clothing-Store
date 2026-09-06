@@ -1,7 +1,9 @@
 const express = require("express");
 const { requireAuth, requireRole } = require("../middleware/auth");
 const {
-  UsernameTakenError,
+  EmailTakenError,
+  EmployeeNumberTakenError,
+  InvalidEmployeeDetailsError,
   InvalidRoleError,
   WeakPasswordError,
   EmployeeNotFoundError,
@@ -12,12 +14,12 @@ const {
 function buildEmployeesRouter(employeeService) {
   const router = express.Router();
 
-  router.post("/", requireAuth, requireRole("superadmin"), (req, res) => {
-    const { name, username, password, role } = req.body || {};
-    if (!name || !username || !password || !role) {
+  router.post("/", requireAuth, requireRole("manager", "superadmin"), (req, res) => {
+    const { name, email, employeeNumber, password, role } = req.body || {};
+    if (!name || !email || !password || !role) {
       return res
         .status(400)
-        .json({ error: "name, username, password, and role are required." });
+        .json({ error: "name, email, password, and role are required." });
     }
 
     const storeId = req.user.storeId;
@@ -25,14 +27,15 @@ function buildEmployeesRouter(employeeService) {
     try {
       const employee = employeeService.onboardEmployee({
         name,
-        username,
+        email,
+        employeeNumber,
         password,
         role,
         storeId,
       });
       return res.status(201).json(employee);
     } catch (err) {
-      if (err instanceof UsernameTakenError) {
+      if (err instanceof EmailTakenError || err instanceof EmployeeNumberTakenError) {
         return res.status(409).json({ error: err.message });
       }
       if (err instanceof InvalidRoleError || err instanceof WeakPasswordError) {
@@ -42,7 +45,7 @@ function buildEmployeesRouter(employeeService) {
     }
   });
 
-  router.get("/", requireAuth, requireRole("superadmin"), (req, res) => {
+  router.get("/", requireAuth, requireRole("manager", "superadmin"), (req, res) => {
     try {
       const employees = employeeService.listEmployees();
       return res.json(employees);
@@ -51,10 +54,35 @@ function buildEmployeesRouter(employeeService) {
     }
   });
 
+  router.patch("/:id/details", requireAuth, requireRole("manager", "superadmin"), (req, res) => {
+    const { name, email } = req.body || {};
+    if (!name || !email) {
+      return res.status(400).json({ error: "name and email are required." });
+    }
+    try {
+      return res.json(employeeService.updateDetails({
+        employeeId: Number(req.params.id),
+        name,
+        email,
+      }));
+    } catch (err) {
+      if (err instanceof EmployeeNotFoundError) {
+        return res.status(404).json({ error: err.message });
+      }
+      if (err instanceof EmailTakenError) {
+        return res.status(409).json({ error: err.message });
+      }
+      if (err instanceof InvalidEmployeeDetailsError) {
+        return res.status(400).json({ error: err.message });
+      }
+      return res.status(500).json({ error: "Failed to update employee details." });
+    }
+  });
+
   router.patch(
     "/:id/role",
     requireAuth,
-    requireRole("superadmin"),
+    requireRole("manager", "superadmin"),
     (req, res) => {
       const { role } = req.body || {};
       if (!role) {

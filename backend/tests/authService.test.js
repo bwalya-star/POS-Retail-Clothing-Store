@@ -14,24 +14,24 @@ describe("AuthService (UC1: Login)", () => {
     authService = new AuthService(new EmployeeRepository(db));
   });
 
-  test("logs in successfully with valid credentials", () => {
-    const result = authService.login("cashier", "cashier123");
+  test("logs in successfully with email credentials", () => {
+    const result = authService.login("grace.mulenga@test.local", "cashier123");
     expect(result.role).toBe("cashier");
     expect(typeof result.token).toBe("string");
   });
 
-  test("rejects an unknown username", () => {
-    expect(() => authService.login("nobody", "whatever")).toThrow(InvalidCredentialsError);
+  test("rejects an unknown email", () => {
+    expect(() => authService.login("nobody@example.com", "whatever")).toThrow(InvalidCredentialsError);
   });
 
   test("rejects an incorrect password", () => {
-    expect(() => authService.login("cashier", "wrongpassword")).toThrow(InvalidCredentialsError);
+    expect(() => authService.login("grace.mulenga@test.local", "wrongpassword")).toThrow(InvalidCredentialsError);
   });
 
   test("locks the account after 5 failed attempts (extension 2a)", () => {
     for (let i = 0; i < 5; i++) {
-      expect(() => authService.login("cashier", "wrong")).toThrow(InvalidCredentialsError);
+      expect(() => authService.login("grace.mulenga@test.local", "wrong")).toThrow(InvalidCredentialsError);
     }
-    expect(() => authService.login("cashier", "cashier123")).toThrow(AccountDisabledError);
+    expect(() => authService.login("grace.mulenga@test.local", "cashier123")).toThrow(AccountDisabledError);
   });
 });

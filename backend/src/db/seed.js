@@ -28,15 +28,26 @@ function seed() {
     .run(storeId).lastInsertRowid;
 
   const employees = [
-    { username: "superadmin", password: "superadmin123", name: "Super Admin", role: "superadmin" },
-    { username: "manager", password: "manager123", name: "Store Manager", role: "manager" },
-    { username: "cashier", password: "cashier123", name: "Sales Assistant", role: "cashier" },
+    { employeeNumber: "EMP-0001", email: "dorn.banda@pos.local", password: "superadmin123", name: "Dorn Banda", role: "superadmin" },
+    { employeeNumber: "EMP-0002", email: "brian.phiri@pos.local", password: "manager123", name: "Brian Phiri", role: "manager" },
+    { employeeNumber: "EMP-0003", email: "grace.mulenga@pos.local", password: "cashier123", name: "Grace Mulenga", role: "cashier" },
   ];
   const insertEmployee = db.prepare(
-    "INSERT INTO employees (store_id, username, password_hash, name, role) VALUES (?, ?, ?, ?, ?)"
+    `INSERT INTO employees
+     (store_id, email, employee_number, government_name, username, password_hash, name, role)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
   );
   for (const e of employees) {
-    insertEmployee.run(storeId, e.username, bcrypt.hashSync(e.password, 10), e.name, e.role);
+    insertEmployee.run(
+      storeId,
+      e.email,
+      e.employeeNumber,
+      e.name,
+      e.email,
+      bcrypt.hashSync(e.password, 10),
+      e.name,
+      e.role
+    );
   }
 
   const specs = [
@@ -68,7 +79,7 @@ function seed() {
 
   console.log("Seed complete:");
   console.log("  Store:", storeId, "Register:", registerId);
-  console.log("  Employees:", employees.map((e) => `${e.username}/${e.password} (${e.role})`).join(", "));
+  console.log("  Employees:", employees.map((e) => `${e.email}/${e.password} (${e.role})`).join(", "));
   console.log("  Product variants:", variants.map((v) => v.sku).join(", "));
 }
 
