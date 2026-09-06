@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../api/client";
+import { roleLabel } from "../roleLabels";
 
-export default function POSTerminalPage() {
+export default function POSTerminalPage({ hideHeader = false }) {
   const { auth, logout } = useAuth();
   const [sku, setSku] = useState("");
   const [quantity, setQuantity] = useState(1);
@@ -53,10 +54,12 @@ export default function POSTerminalPage() {
 
   return (
     <div className="page">
-      <header className="topbar">
-        <span>Cashier: {auth.name}</span>
-        <button onClick={logout}>Logout</button>
-      </header>
+      {!hideHeader && (
+        <header className="topbar">
+          <span>{roleLabel(auth.role)}: {auth.name}</span>
+          <button onClick={logout}>Logout</button>
+        </header>
+      )}
 
       <h1>POS Terminal</h1>
 

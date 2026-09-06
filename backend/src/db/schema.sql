@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS employees (
   username TEXT NOT NULL UNIQUE,
   password_hash TEXT NOT NULL,
   name TEXT NOT NULL,
-  role TEXT NOT NULL CHECK (role IN ('cashier', 'manager', 'admin')),
+  role TEXT NOT NULL CHECK (role IN ('cashier', 'manager', 'superadmin')),
   is_active INTEGER NOT NULL DEFAULT 1,
   failed_login_attempts INTEGER NOT NULL DEFAULT 0
 );

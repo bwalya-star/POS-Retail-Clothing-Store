@@ -9,7 +9,7 @@ const {
 function buildSalesRouter(saleService) {
   const router = express.Router();
 
-  router.post("/", requireAuth, requireRole("cashier", "manager", "admin"), (req, res) => {
+  router.post("/", requireAuth, requireRole("cashier", "manager", "superadmin"), (req, res) => {
     const { registerId, customerId, lineItems, payment } = req.body || {};
     if (!registerId || !Array.isArray(lineItems) || !payment) {
       return res

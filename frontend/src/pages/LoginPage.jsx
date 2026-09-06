@@ -43,7 +43,7 @@ export default function LoginPage() {
         </button>
 
         <p className="hint">
-          Demo accounts: cashier/cashier123, manager/manager123, admin/admin123
+          Demo accounts: cashier/cashier123, manager/manager123, superadmin/superadmin123
         </p>
       </form>
     </div>

@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../api/client";
+import { roleLabel } from "../roleLabels";
 
-export default function RestockPage() {
+export default function RestockPage({ hideHeader = false }) {
   const { auth, logout } = useAuth();
   const [inventory, setInventory] = useState([]);
   const [sku, setSku] = useState("");
@@ -37,10 +38,12 @@ export default function RestockPage() {
 
   return (
     <div className="page">
-      <header className="topbar">
-        <span>Manager: {auth.name}</span>
-        <button onClick={logout}>Logout</button>
-      </header>
+      {!hideHeader && (
+        <header className="topbar">
+          <span>{roleLabel(auth.role)}: {auth.name}</span>
+          <button onClick={logout}>Logout</button>
+        </header>
+      )}
 
       <h1>Restock Inventory</h1>
 

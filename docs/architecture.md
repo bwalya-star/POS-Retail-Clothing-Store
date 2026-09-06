@@ -11,7 +11,7 @@ flowchart TB
     subgraph Presentation["Presentation Layer"]
         UI1[POS Terminal UI]
         UI2[Manager Dashboard UI]
-        UI3[Admin UI]
+        UI3[Super Admin UI]
     end
 
     subgraph Domain["Domain / Application Layer"]
@@ -58,14 +58,14 @@ flowchart TB
 
 | Layer | Responsibility | Depends on |
 |---|---|---|
-| **Presentation** | Renders screens per role (Cashier, Manager, Admin); captures input; contains no business rules. | Domain/Application layer only |
+| **Presentation** | Renders screens per role (Cashier, Manager, Super Admin); captures input; contains no business rules. | Domain/Application layer only |
 | **Domain / Application** | Implements use-case logic (`processSale`, `restockItem`, `authenticate`, `generateReport`) and holds the domain model (Sale, ProductVariant, Employee, etc.). | Data Access layer only |
 | **Data Access** | Translates domain objects to/from persistent storage (repositories/DAOs); isolates SQL from business logic. | Database only |
 
 ## Why This Layering Addresses the Top Risk
 
 - **Poor database design / performance risk** (from the risk list) is contained to the Data Access layer — schema or query changes do not ripple into UI or business logic.
-- **Security vulnerabilities risk** is addressed by routing all role-sensitive operations (Manager/Admin screens) through `AuthService` before reaching the Domain layer.
+- **Security vulnerabilities risk** is addressed by routing all role-sensitive operations (Manager/Super Admin screens) through `AuthService` before reaching the Domain layer. `AuthService` grants the Super Admin role every permission granted to Cashier and Store Manager, and reserves employee onboarding/role assignment (`EmployeeService`) exclusively for Super Admin.
 - **Testability**: the Domain/Application layer can be unit-tested against the Data Access layer's repository interfaces without a UI or live database, supporting the Construction phase's test-case requirements.
 
 ## Mapping to Use Cases

@@ -40,7 +40,7 @@ npm install
 npm run dev    # starts the app, printed URL (e.g. http://localhost:5173)
 ```
 
-Demo accounts (created by `npm run seed`): `cashier/cashier123`, `manager/manager123`, `admin/admin123`.
+Demo accounts (created by `npm run seed`): `cashier/cashier123`, `manager/manager123`, `superadmin/superadmin123`.
 
 Requires Node.js >= 22.5 (uses the built-in `node:sqlite` module, no native build step needed).
 

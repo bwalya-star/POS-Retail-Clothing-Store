@@ -26,7 +26,7 @@ function seed() {
     .run(storeId).lastInsertRowid;
 
   const employees = [
-    { username: "admin", password: "admin123", name: "System Administrator", role: "admin" },
+    { username: "superadmin", password: "superadmin123", name: "Super Admin", role: "superadmin" },
     { username: "manager", password: "manager123", name: "Store Manager", role: "manager" },
     { username: "cashier", password: "cashier123", name: "Sales Assistant", role: "cashier" },
   ];

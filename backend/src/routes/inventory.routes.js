@@ -9,7 +9,7 @@ function buildInventoryRouter(inventoryService, productRepository) {
     return res.json(productRepository.listVariants());
   });
 
-  router.post("/restock", requireAuth, requireRole("manager", "admin"), (req, res) => {
+  router.post("/restock", requireAuth, requireRole("manager", "superadmin"), (req, res) => {
     const { sku, quantity } = req.body || {};
     if (!sku || !quantity) {
       return res.status(400).json({ error: "sku and quantity are required." });

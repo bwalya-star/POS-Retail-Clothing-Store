@@ -11,13 +11,13 @@ This document expands 3 of the 8 use cases identified in the [High-Level Require
 
 - **Scope:** POS Retail Clothing Store System
 - **Level:** User goal
-- **Primary Actor:** Cashier, Store Manager, System Administrator
+- **Primary Actor:** Cashier, Store Manager, Super Admin
 - **Stakeholders and Interests:**
   - *Store Manager:* Wants assurance that only authorized staff can access sales and inventory functions.
-  - *System Administrator:* Wants centralized control over accounts and access levels.
+  - *Super Admin:* Wants centralized control over accounts and access levels.
   - *Cashier:* Wants quick, reliable access to start serving customers.
-- **Preconditions:** User has a valid account provisioned by a System Administrator.
-- **Success Guarantee (Postconditions):** User is authenticated and granted a session scoped to their role (Cashier, Manager, Administrator).
+- **Preconditions:** User has a valid account provisioned by a Super Admin.
+- **Success Guarantee (Postconditions):** User is authenticated and granted a session scoped to their role (Cashier, Store Manager, or Super Admin).
 
 ### Main Success Scenario
 1. User enters username and password at the login screen.
@@ -28,7 +28,7 @@ This document expands 3 of the 8 use cases identified in the [High-Level Require
 ### Extensions
 - **2a. Invalid credentials:**
   1. System displays an error message.
-  2. System returns to step 1. After 5 consecutive failed attempts, the account is locked and the System Administrator is notified.
+  2. System returns to step 1. After 5 consecutive failed attempts, the account is locked and the Super Admin is notified.
 - **2b. Account disabled/locked:**
   1. System displays an "account disabled" message and denies access.
 
@@ -76,7 +76,7 @@ This document expands 3 of the 8 use cases identified in the [High-Level Require
 - **Primary Actor:** Store Manager
 - **Stakeholders and Interests:**
   - *Store Manager:* Wants stock counts to reflect newly received merchandise accurately.
-  - *System Administrator:* Wants inventory changes attributable to an authenticated, authorized user.
+  - *Super Admin:* Wants inventory changes attributable to an authenticated, authorized user.
   - *Cashier:* Depends on accurate stock levels to avoid overselling.
 - **Preconditions:** Manager is logged in.
 - **Success Guarantee (Postconditions):** Stock quantity for each restocked product variant (style + size + colour) is increased and a stock-adjustment record is created.
@@ -98,4 +98,6 @@ This document expands 3 of the 8 use cases identified in the [High-Level Require
 
 ## Remaining Use Cases (70%)
 
-The remaining 5 use cases from the high-level requirements — **View Stock Levels, Generate Sales Reports, Manage Employees, Register Customer, Manage Users** — are deferred to Elaboration Iteration 2, per the course's iteration plan.
+The remaining 5 use cases from the high-level requirements — **View Stock Levels, Generate Sales Reports, Manage Employees, Register Customer, and Onboard Employee & Assign Role (Super Admin)** — are deferred to Elaboration Iteration 2, per the course's iteration plan.
+
+Note on scope for **Onboard Employee & Assign Role**: this use case's primary actor is the Super Admin, who is the only actor permitted to create employee accounts and assign them a role (Cashier, Store Manager, or Super Admin). Because the Super Admin also has the combined permissions of every other role, this use case's design (Elaboration Iteration 2) should double as the specification for the role-based access control enforced across all other use cases.
