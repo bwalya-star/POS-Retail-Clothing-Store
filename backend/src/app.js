@@ -29,6 +29,7 @@ function createApp(db) {
   const salesReportService = new SalesReportService(saleRepository);
 
   const app = express();
+  app.locals.db = db;
   app.use(cors());
   app.use(express.json());
 
@@ -36,9 +37,14 @@ function createApp(db) {
   app.use("/api/auth", buildAuthRouter(authService));
   app.use("/api/employees", buildEmployeesRouter(employeeService));
   app.use("/api/sales", buildSalesRouter(saleService));
+<<<<<<< HEAD
   app.use("/api/inventory", buildInventoryRouter(inventoryService, productRepository));
   app.use("/api/reports", buildReportsRouter(salesReportService));
   
+=======
+  app.use("/api/inventory", buildInventoryRouter(inventoryService));
+  app.use("/api/reports", buildReportsRouter(salesReportService));
+>>>>>>> 636bec9a52a82d131631cff337886b654e825da2
 
   return app;
 }

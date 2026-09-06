@@ -18,7 +18,7 @@ class ProductRepository {
   listVariants() {
     return this.db
       .prepare(
-        `SELECT pv.*, ps.name AS product_name, ps.style_code
+        `SELECT pv.*, ps.name AS product_name, ps.style_code, ps.description
          FROM product_variants pv
          JOIN product_specifications ps ON ps.id = pv.product_specification_id
          ORDER BY ps.name, pv.size, pv.colour`
@@ -58,12 +58,12 @@ class ProductRepository {
       .get(styleCode);
   }
 
-  insertSpec({ styleCode, name, basePrice }) {
+  insertSpec({ styleCode, name, description, basePrice }) {
     const result = this.db
       .prepare(
-        "INSERT INTO product_specifications (style_code, name, base_price) VALUES (?, ?, ?)"
+        "INSERT INTO product_specifications (style_code, name, description, base_price) VALUES (?, ?, ?, ?)"
       )
-      .run(styleCode, name, basePrice);
+      .run(styleCode, name, description || null, basePrice);
     return result.lastInsertRowid;
   }
 

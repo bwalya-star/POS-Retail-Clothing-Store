@@ -2,14 +2,13 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../api/client";
 
-const PALETTE = ["#7c5cff", "#ff8a5c", "#26c0a1", "#5c9dff", "#ff5c8a", "#c05cff"];
-function colourFor(key) {
-  let hash = 0;
-  for (let i = 0; i < key.length; i++) hash = (hash * 31 + key.charCodeAt(i)) >>> 0;
-  return PALETTE[hash % PALETTE.length];
+function stockLevel(quantity) {
+  if (quantity <= 0) return "out";
+  if (quantity <= 5) return "low";
+  return "ok";
 }
 
-const BLANK_PRODUCT = { styleCode: "", productName: "", basePrice: "", sku: "", size: "", colour: "", unitPrice: "", quantityOnHand: "" };
+const BLANK_PRODUCT = { styleCode: "", productName: "", description: "", basePrice: "", sku: "", size: "", colour: "", unitPrice: "", quantityOnHand: "" };
 
 export default function InventoryPage() {
   const { auth } = useAuth();
@@ -19,6 +18,7 @@ export default function InventoryPage() {
   const [restockQty, setRestockQty] = useState(1);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [confirmDeleteSku, setConfirmDeleteSku] = useState(null);
 
   async function loadInventory() {
     const items = await api.listInventory(auth.token);
@@ -40,6 +40,7 @@ export default function InventoryPage() {
     setForm({
       styleCode: variant.style_code,
       productName: variant.product_name,
+      description: variant.description || "",
       basePrice: "",
       sku: variant.sku,
       size: variant.size,
@@ -64,6 +65,7 @@ export default function InventoryPage() {
       await api.createProduct(auth.token, {
         styleCode: form.styleCode,
         productName: form.productName,
+        description: form.description,
         basePrice: form.basePrice ? Number(form.basePrice) : undefined,
         sku: form.sku,
         size: form.size,
@@ -109,15 +111,19 @@ export default function InventoryPage() {
     }
   }
 
-  async function handleDelete(variant) {
+  // Delete is a two-step process: first click arms the row ("Delete" -> "Confirm?"),
+  // second click actually removes it. Any other action on the row cancels the arm.
+  async function confirmDelete(variant) {
     setError("");
     setMessage("");
     try {
       await api.deleteProduct(auth.token, variant.sku);
       setMessage(`${variant.sku} removed.`);
+      setConfirmDeleteSku(null);
       loadInventory();
     } catch (err) {
       setError(err.message);
+      setConfirmDeleteSku(null);
     }
   }
 
@@ -126,28 +132,62 @@ export default function InventoryPage() {
       <div style={{ flex: 1, minWidth: 0 }}>
         <div className="row" style={{ justifyContent: "space-between" }}>
           <h1>Manage Inventory</h1>
-          <button onClick={openAdd}>+ Add Product</button>
+          <button onClick={openAdd}>
+            <span>+ Add Product</span>
+            <span></span>
+          </button>
         </div>
         {message && <p className="success">{message}</p>}
         {!panel && error && <p className="error">{error}</p>}
 
-        <div className="product-grid">
-          {products.map((v) => (
-            <div key={v.id} className="product-card" style={{ cursor: "default" }}>
-              <div className="product-thumb" style={{ background: colourFor(v.sku) }}>
-                {v.product_name.charAt(0)}
+        <div className="item-list">
+          {products.length === 0 && <div className="item-row is-empty">No products yet.</div>}
+          {products.map((v) => {
+            const level = stockLevel(v.quantity_on_hand);
+            const confirming = confirmDeleteSku === v.sku;
+            return (
+              <div key={v.id} className="item-row has-actions" style={{ cursor: "default" }}>
+                <div className="item-main">
+                  <div className="name">{v.product_name}</div>
+                  {v.description && <div className="description">{v.description}</div>}
+                </div>
+                <div className="item-meta">{v.sku}<br />{v.size} / {v.colour}</div>
+                <span className={`item-stock ${level}`}>
+                  {level === "out" ? "Out of stock" : `${v.quantity_on_hand} in stock`}
+                </span>
+                <div className="item-price">${v.unit_price.toFixed(2)}</div>
+                <div className="item-actions">
+                  {confirming ? (
+                    <>
+                      <button className="danger" onClick={() => confirmDelete(v)}>
+                        <span>Confirm</span>
+                        <span></span>
+                      </button>
+                      <button className="ghost" onClick={() => setConfirmDeleteSku(null)}>
+                        <span>Cancel</span>
+                        <span></span>
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button className="ghost" onClick={() => openRestock(v)}>
+                        <span>Restock</span>
+                        <span></span>
+                      </button>
+                      <button className="ghost" onClick={() => openEdit(v)}>
+                        <span>Edit</span>
+                        <span></span>
+                      </button>
+                      <button className="danger" onClick={() => setConfirmDeleteSku(v.sku)}>
+                        <span>Delete</span>
+                        <span></span>
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
-              <div className="name">{v.product_name}</div>
-              <div className="meta">{v.sku}</div>
-              <div className="meta">{v.size} / {v.colour} &middot; {v.quantity_on_hand} in stock</div>
-              <div className="price">${v.unit_price.toFixed(2)}</div>
-              <div className="actions">
-                <button className="ghost" onClick={() => openRestock(v)}>Restock</button>
-                <button className="ghost" onClick={() => openEdit(v)}>Edit</button>
-                <button className="danger" onClick={() => handleDelete(v)}>Delete</button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
@@ -158,6 +198,7 @@ export default function InventoryPage() {
               <h2>Add Product</h2>
               <label>Style Code<input value={form.styleCode} onChange={(e) => setForm({ ...form, styleCode: e.target.value })} required /></label>
               <label>Product Name<input value={form.productName} onChange={(e) => setForm({ ...form, productName: e.target.value })} required /></label>
+              <label>Description<input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Short description shown on the POS list" /></label>
               <label>Base Price (only needed for a new style)<input type="number" step="0.01" value={form.basePrice} onChange={(e) => setForm({ ...form, basePrice: e.target.value })} /></label>
               <label>SKU<input value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} required /></label>
               <label>Size<input value={form.size} onChange={(e) => setForm({ ...form, size: e.target.value })} required /></label>
@@ -166,8 +207,14 @@ export default function InventoryPage() {
               <label>Initial Quantity<input type="number" value={form.quantityOnHand} onChange={(e) => setForm({ ...form, quantityOnHand: e.target.value })} /></label>
               {error && <p className="error">{error}</p>}
               <div className="row">
-                <button type="button" className="ghost" onClick={() => setPanel(null)}>Cancel</button>
-                <button type="submit">Add Product</button>
+                <button type="button" className="ghost" onClick={() => setPanel(null)}>
+                  <span>Cancel</span>
+                  <span></span>
+                </button>
+                <button type="submit">
+                  <span>Add Product</span>
+                  <span></span>
+                </button>
               </div>
             </form>
           )}
@@ -180,8 +227,14 @@ export default function InventoryPage() {
               <label>Unit Price<input type="number" step="0.01" value={form.unitPrice} onChange={(e) => setForm({ ...form, unitPrice: e.target.value })} required /></label>
               {error && <p className="error">{error}</p>}
               <div className="row">
-                <button type="button" className="ghost" onClick={() => setPanel(null)}>Cancel</button>
-                <button type="submit">Save Changes</button>
+                <button type="button" className="ghost" onClick={() => setPanel(null)}>
+                  <span>Cancel</span>
+                  <span></span>
+                </button>
+                <button type="submit">
+                  <span>Save Changes</span>
+                  <span></span>
+                </button>
               </div>
             </form>
           )}
@@ -193,8 +246,14 @@ export default function InventoryPage() {
               <label>Quantity Received<input type="number" min="1" value={restockQty} onChange={(e) => setRestockQty(e.target.value)} required /></label>
               {error && <p className="error">{error}</p>}
               <div className="row">
-                <button type="button" className="ghost" onClick={() => setPanel(null)}>Cancel</button>
-                <button type="submit">Restock</button>
+                <button type="button" className="ghost" onClick={() => setPanel(null)}>
+                  <span>Cancel</span>
+                  <span></span>
+                </button>
+                <button type="submit">
+                  <span>Restock</span>
+                  <span></span>
+                </button>
               </div>
             </form>
           )}
