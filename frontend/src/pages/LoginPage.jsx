@@ -58,7 +58,7 @@ export default function LoginPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="cashier@pos.local"
+              placeholder="employee@example.com"
               autoComplete="username"
               autoFocus
             />
@@ -100,10 +100,6 @@ export default function LoginPage() {
             <span></span>
           </button>
 
-          <div className="login-card-foot">
-            <span className="hint">Demo accounts</span>
-            <span className="hint">grace.mulenga@pos.local · brian.phiri@pos.local · dorn.banda@pos.local</span>
-          </div>
         </form>
       </div>
     </div>
