@@ -96,8 +96,41 @@ This document expands 3 of the 8 use cases identified in the [High-Level Require
 
 ---
 
+## UC4: Onboard Employee & Assign Role
+
+- **Scope:** POS Retail Clothing Store System
+- **Level:** User goal
+- **Primary Actor:** Super Admin
+- **Stakeholders and Interests:**
+  - *Super Admin:* Wants a fast, reliable way to bring a new hire into the system with the correct permissions, and to correct a role later if needed.
+  - *Store Manager:* Wants new cashiers usable on the register on their first shift.
+  - *New Employee:* Wants working credentials from day one.
+- **Preconditions:** Actor is logged in as Super Admin (see UC1: Login).
+- **Success Guarantee (Postconditions):** A new employee record exists with a hashed password and exactly one role (`cashier`, `manager`, or `superadmin`); the employee can immediately log in with that role's permissions. For a role change, the existing employee's role is updated and takes effect on their next login (or immediately, if sessions carry the role server-side rather than only in the JWT — see Design Note below).
+
+### Main Success Scenario (Onboard)
+1. Super Admin selects "Onboard Employee."
+2. Super Admin enters the new employee's name, a unique username, an initial password, and selects a role.
+3. System validates the username is not already taken and the role is one of the three valid roles.
+4. System hashes the password, creates the employee record, and confirms creation to the Super Admin.
+5. Super Admin communicates the initial credentials to the new employee out of band (this system does not email credentials in this iteration).
+
+### Alternate Flow (Assign/Change Role)
+1. Super Admin selects an existing employee from the employee list.
+2. Super Admin selects a new role for that employee.
+3. System updates the employee's role and confirms.
+
+### Extensions
+- **3a. Username already taken:** System rejects the request with an error; Super Admin picks a different username.
+- **3b. Invalid role value:** System rejects the request; only `cashier`, `manager`, `superadmin` are accepted.
+- **3c. Weak/empty password:** System rejects the request with a minimum-length requirement (suggest: 8+ characters, matching typical course-project security expectations).
+- **1a (Alternate Flow). Super Admin attempts to demote/deactivate their own account:** System warns and requires confirmation, since it can strand the store with no Super Admin — deciding whether to allow this at all, and if so under what safeguard, is an open design question for whoever implements this (see the design note below).
+
+### Design Note for Implementer
+This use case's design should also serve as the specification for the role-based access control already enforced (by convention) across UC1-UC3 — i.e., implementing this is a good forcing function to double check every existing route's `requireRole(...)` list against [Domain Model](domain_model.md)'s "Super Admin has access to all roles" rule.
+
+---
+
 ## Remaining Use Cases (70%)
 
-The remaining 5 use cases from the high-level requirements — **View Stock Levels, Generate Sales Reports, Manage Employees, Register Customer, and Onboard Employee & Assign Role (Super Admin)** — are deferred to Elaboration Iteration 2, per the course's iteration plan.
-
-Note on scope for **Onboard Employee & Assign Role**: this use case's primary actor is the Super Admin, who is the only actor permitted to create employee accounts and assign them a role (Cashier, Store Manager, or Super Admin). Because the Super Admin also has the combined permissions of every other role, this use case's design (Elaboration Iteration 2) should double as the specification for the role-based access control enforced across all other use cases.
+UC4 above is now detailed. The remaining 4 use cases from the high-level requirements — **View Stock Levels, Generate Sales Reports, Manage Employees (records beyond role — e.g. contact info, employment status), and Register Customer** — are still deferred to later Elaboration/Construction iterations.

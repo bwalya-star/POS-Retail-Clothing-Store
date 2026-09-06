@@ -60,4 +60,21 @@ sequenceDiagram
 
 ---
 
-These three SSDs correspond one-to-one with the fully dressed use cases (UC1–UC3) documented for this iteration. SSDs for the remaining use cases will be produced in Elaboration Iteration 2 alongside their detailed use case descriptions.
+## SSD4: Onboard Employee & Assign Role
+
+```mermaid
+sequenceDiagram
+    actor SA as Super Admin
+    participant S as System
+
+    SA->>S: onboardEmployee(name, username, password, role)
+    S-->>SA: employeeCreated(employeeId)
+
+    Note over SA,S: Alternate flow - change an existing employee's role
+    SA->>S: assignRole(employeeId, role)
+    S-->>SA: roleUpdated()
+```
+
+---
+
+These four SSDs correspond one-to-one with the fully dressed use cases (UC1–UC4) documented so far. SSDs for the remaining use cases will be produced alongside their detailed use case descriptions.
