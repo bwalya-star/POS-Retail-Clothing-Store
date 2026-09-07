@@ -58,6 +58,7 @@ flowchart LR
 - [System Sequence Diagrams (SSDs for UC1–UC8)](docs/system_sequence_diagrams.md)
 - [Domain Model & Software Design Class Diagram (DCD)](docs/domain_model.md)
 - [3-Tier Architecture & REST API Specification](docs/architecture.md)
+- [Database Design (ERD, Table Definitions & Normalization)](docs/database_design.md)
 
 ### Phase 3: Construction Phase
 *Objective: Build production application, SQLite persistence, React UI, and verify 100% passing test suite (IOC Milestone).*

@@ -14,8 +14,8 @@ class AuthService {
   }
 
   // UC1: Login
-  login(email, password) {
-    const employee = this.employeeRepository.findByEmail(email);
+  async login(email, password) {
+    const employee = await this.employeeRepository.findByEmail(email);
     if (!employee) {
       throw new InvalidCredentialsError("Invalid email or password.");
     }
@@ -26,16 +26,16 @@ class AuthService {
 
     const passwordMatches = bcrypt.compareSync(password, employee.password_hash);
     if (!passwordMatches) {
-      this.employeeRepository.incrementFailedAttempts(employee.id);
-      const updated = this.employeeRepository.findById(employee.id);
+      await this.employeeRepository.incrementFailedAttempts(employee.id);
+      const updated = await this.employeeRepository.findById(employee.id);
       if (updated.failed_login_attempts >= MAX_FAILED_ATTEMPTS) {
-        this.employeeRepository.deactivate(employee.id);
+        await this.employeeRepository.deactivate(employee.id);
       }
       throw new InvalidCredentialsError("Invalid email or password.");
     }
 
-    this.employeeRepository.resetFailedAttempts(employee.id);
-    const registerId = this.employeeRepository.findRegisterIdByStoreId(employee.store_id);
+    await this.employeeRepository.resetFailedAttempts(employee.id);
+    const registerId = await this.employeeRepository.findRegisterIdByStoreId(employee.store_id);
 
     const token = jwt.sign(
       {
