@@ -57,6 +57,7 @@ This document contains fully dressed descriptions for all 8 use cases identified
 7. System calculates grand total including sales tax.
 8. Cashier enters payment method (Cash/Card) and tendered amount.
 9. System validates payment, records transaction atomically, decrements stock quantity for each line item SKU, calculates change due, and issues receipt.
+10. (Optional) Cashier clicks "Print Receipt" to download the receipt.
 
 ### Extensions
 - **3a. SKU not found:** System alerts Cashier; Cashier re-enters or verifies barcode.
@@ -185,14 +186,16 @@ This document contains fully dressed descriptions for all 8 use cases identified
 
 - **Scope:** POS Retail Clothing Store System
 - **Level:** User goal
-- **Primary Actor:** Store Manager, Super Admin
+- **Primary Actor:** Cashier, Store Manager, Super Admin
 - **Stakeholders and Interests:**
   - *Store Manager:* Wants accurate revenue reports, transaction totals, and top-selling item metrics.
-- **Preconditions:** User is logged in as Store Manager or Super Admin.
-- **Success Guarantee (Postconditions):** Aggregated sales report generated for specified date range.
+  - *Cashier:* Wants to see their own sales count and revenue for a given period.
+- **Preconditions:** User is logged in.
+- **Success Guarantee (Postconditions):** Aggregated sales report (Manager/Super Admin) or individual sales log (all roles) generated for the specified period.
 
 ### Main Success Scenario
-1. User selects "Sales Reports."
-2. User selects date range (Daily, Weekly, Monthly, or Custom Range).
-3. System aggregates transaction count, total sales revenue, average transaction value, and top product variants sold.
-4. System renders summary charts and detailed transaction breakdown table.
+1. User selects "Dashboard" (Manager/Super Admin) or "Sales."
+2. User selects a period (Today, This Week, This Month, or All Time).
+3. **Dashboard:** System aggregates transaction count, total sales revenue, average transaction value, and top product variants sold.
+4. **Sales:** System lists individual sales for the period - date/time, cashier, items, payment method, total. Cashiers see only their own sales; Manager/Super Admin see every sale and may filter to one cashier.
+5. User may export the sales list as a CSV file.

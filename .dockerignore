@@ -1,0 +1,10 @@
+node_modules
+**/node_modules
+.git
+backend/data
+**/.env
+**/.env.*
+!**/.env.example
+docs
+frontend/dist
+*.log

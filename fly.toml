@@ -1,0 +1,24 @@
+app = "pos-retail-clothing-store"
+primary_region = "jnb"
+
+[build]
+
+[env]
+  PORT = "4000"
+  DB_PATH = "/data/pos.sqlite3"
+  NODE_ENV = "production"
+
+[[mounts]]
+  source = "pos_data"
+  destination = "/data"
+
+[http_service]
+  internal_port = 4000
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"
