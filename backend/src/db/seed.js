@@ -36,6 +36,7 @@ function seed() {
     { employeeNumber: "EMP-0001", email: "dorn.banda@pos.local", password: "superadmin123", name: "Dorn Banda", role: "superadmin" },
     { employeeNumber: "EMP-0002", email: "brian.phiri@pos.local", password: "manager123", name: "Brian Phiri", role: "manager" },
     { employeeNumber: "EMP-0003", email: "grace.mulenga@pos.local", password: "cashier123", name: "Grace Mulenga", role: "cashier" },
+    { employeeNumber: "EMP-0004", email: "moses.kaluba@cs.unza.zm", password: "superadmin123", name: "Moses Kaluba", role: "superadmin" },
   ];
   const insertEmployee = db.prepare(
     `INSERT INTO employees
