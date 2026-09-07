@@ -71,6 +71,12 @@ flowchart LR
 
 ---
 
+### Backend API documentations
+*the fillowing provides the whole backend documentation, endpoints, expected data in post requests and returned data in GET requests, the structure of the db.*
+- [Backend API docs](docs/backend_docs.md)
+
+---
+
 ## Quick Start Guide
 
 ### Prerequisites
