@@ -184,7 +184,7 @@ export default function InventoryPage() {
                 <span className={`item-stock ${level}`}>
                   {level === "out" ? "Out of stock" : `${v.quantity_on_hand} in stock`}
                 </span>
-                <div className="item-price">K{v.unit_price.toFixed(2)}</div>
+                <div className="item-price">${v.unit_price.toFixed(2)}</div>
                 <div className="item-actions">
                   {confirming ? (
                     <>
