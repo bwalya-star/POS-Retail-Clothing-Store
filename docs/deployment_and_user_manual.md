@@ -82,7 +82,14 @@ graph TD
 5. (Optional) Enter the customer's phone number or register a new customer profile (UC6).
 6. Click **Complete Sale**.
 7. Enter the payment method (**Cash** or **Card**) and cash tendered amount.
-8. Click **Confirm Payment**. The system calculates change due, updates stock in real time, and prints/renders the receipt summary.
+8. Click **Confirm Payment**. The system calculates change due, updates stock in real time, and renders the receipt summary.
+9. Click **Print Receipt** to download a copy of the receipt as a text file.
+
+#### Viewing My Sales (UC8)
+1. Select **Sales** from the navigation bar.
+2. Choose a period (**Today**, **This Week**, **This Month**, or **All Time**).
+3. The page shows your own sale count and revenue total for that period, plus a list of your individual sales.
+4. Click **Export CSV** to download the list.
 
 ---
 
@@ -104,9 +111,16 @@ graph TD
 2. Items highlighted in amber/red represent inventory below low-stock thresholds (quantity < 5).
 
 #### Generating Sales Reports (UC8)
-1. Select **Sales Reports** from the top menu.
-2. Select the date range (Daily, Weekly, Monthly, or Custom Range).
+1. Select **Dashboard** from the top menu.
+2. Select the period (Today, This Week, This Month, or All Time).
 3. View aggregated total revenue, total sales count, average transaction value, and top-selling clothing items.
+4. Click a stat card to jump to **Top Selling Products**; click a product row to jump to and highlight it in **Inventory**.
+
+#### Reviewing the Sales Log (UC8)
+1. Select **Sales** from the top menu.
+2. Select a period, and optionally filter to one cashier using the cashier dropdown.
+3. View every individual sale for that filter - date/time, cashier, items, payment method, and total.
+4. Click **Export CSV** to download the filtered list for record-keeping.
 
 ---
 

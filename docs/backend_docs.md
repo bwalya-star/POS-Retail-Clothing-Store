@@ -551,3 +551,59 @@ GET /reports/top-sellers?period=month&limit=5
 ]
 
 ```
+
+---
+
+## List Sales
+
+Individual sales, most recent first, with the cashier who made each one. Backs the **Sales** tab in the UI.
+
+### Endpoint
+
+```http
+GET /reports/sales
+```
+
+### Roles Allowed
+
+```text
+cashier
+manager
+superadmin
+```
+
+### Query Parameters
+
+| Parameter | Description                                                                 |
+| --------- | ---------------------------------------------------------------------------- |
+| period    | today, week, month, or all                                                    |
+| cashierId | Optional. manager/superadmin only - filter to one cashier's sales.            |
+
+### Access Rules
+
+- **Cashier:** always scoped to their own sales. Any `cashierId` they send is ignored - the server forces it to their own employee id.
+- **Manager / Super Admin:** see every sale by default, or pass `cashierId` to filter to one employee.
+
+### Example
+
+```http
+GET /reports/sales?period=today
+GET /reports/sales?period=month&cashierId=3
+```
+
+### Response
+
+```json
+[
+  {
+    "id": 10,
+    "date_time": "2026-09-07T03:33:36.504Z",
+    "total_amount": 15,
+    "register_id": 1,
+    "cashier_id": 3,
+    "cashierName": "Grace Mulenga",
+    "paymentMethod": "cash",
+    "itemCount": 1
+  }
+]
+```

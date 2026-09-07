@@ -1,3 +1,5 @@
+const path = require("path");
+const fs = require("fs");
 const express = require("express");
 const cors = require("cors");
 
@@ -39,6 +41,14 @@ function createApp(db) {
   app.use("/api/sales", buildSalesRouter(saleService));
   app.use("/api/inventory", buildInventoryRouter(inventoryService, productRepository));
   app.use("/api/reports", buildReportsRouter(salesReportService));
+
+  const frontendDist = path.join(__dirname, "..", "public");
+  if (fs.existsSync(path.join(frontendDist, "index.html"))) {
+    app.use(express.static(frontendDist));
+    app.get(/^(?!\/api\/).*/, (req, res) => {
+      res.sendFile(path.join(frontendDist, "index.html"));
+    });
+  }
 
   return app;
 }
