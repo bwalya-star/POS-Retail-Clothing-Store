@@ -1,14 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../api/client";
+import Loader from "../components/Loader";
 
 const COLORS = [
-  "#4A6CF7",
-  "#6B4CE6",
-  "#E85C5C",
-  "#38B2AC",
-  "#ED8936",
-  "#9F7AEA",
+  "#1E3A5F",
+  "#5B2C6F",
+  "#7B241C",
+  "#1B5E4F",
+  "#7C4A03",
+  "#4A235A",
 ];
 
 function getColor(key) {
@@ -19,7 +20,7 @@ function getColor(key) {
   return COLORS[hash % COLORS.length];
 }
 
-export default function DashboardPage() {
+export default function DashboardPage({ navigate }) {
   const { auth } = useAuth();
   const [period, setPeriod] = useState("month");
   const [summary, setSummary] = useState({
@@ -30,6 +31,21 @@ export default function DashboardPage() {
   const [topSellers, setTopSellers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [highlightProducts, setHighlightProducts] = useState(false);
+  const productsSectionRef = useRef(null);
+
+  function jumpToTopSellers() {
+    productsSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    setHighlightProducts(true);
+    setTimeout(() => setHighlightProducts(false), 1200);
+  }
+
+  function handleStatCardKeyDown(e) {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      jumpToTopSellers();
+    }
+  }
 
   async function loadDashboard() {
     setLoading(true);
@@ -78,21 +94,45 @@ export default function DashboardPage() {
       )}
 
       {loading ? (
-        <div className="loading-state">Loading dashboard...</div>
+        <div className="loading-state">
+          <Loader />
+          <span>Loading dashboard…</span>
+        </div>
       ) : (
         <>
           <div className="stats-grid">
-            <div className="stat-card">
+            <div
+              className="stat-card is-clickable"
+              role="button"
+              tabIndex={0}
+              title="Jump to top selling products"
+              onClick={jumpToTopSellers}
+              onKeyDown={handleStatCardKeyDown}
+            >
               <span className="stat-label">Total Revenue</span>
               <span className="stat-value">
                 K{Number(summary.totalRevenue).toFixed(2)}
               </span>
             </div>
-            <div className="stat-card">
+            <div
+              className="stat-card is-clickable"
+              role="button"
+              tabIndex={0}
+              title="Jump to top selling products"
+              onClick={jumpToTopSellers}
+              onKeyDown={handleStatCardKeyDown}
+            >
               <span className="stat-label">Number of Sales</span>
               <span className="stat-value">{summary.saleCount}</span>
             </div>
-            <div className="stat-card">
+            <div
+              className="stat-card is-clickable"
+              role="button"
+              tabIndex={0}
+              title="Jump to top selling products"
+              onClick={jumpToTopSellers}
+              onKeyDown={handleStatCardKeyDown}
+            >
               <span className="stat-label">Average Sale</span>
               <span className="stat-value">
                 K{Number(summary.averageSaleValue).toFixed(2)}
@@ -100,7 +140,10 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="products-section">
+          <div
+            className={`products-section${highlightProducts ? " is-highlighted" : ""}`}
+            ref={productsSectionRef}
+          >
             <h2 className="section-heading">Top Selling Products</h2>
 
             {topSellers.length === 0 ? (
@@ -114,15 +157,26 @@ export default function DashboardPage() {
                   const barWidth = maxQuantity > 0 ? (quantity / maxQuantity) * 100 : 0;
                   const color = getColor(product.sku);
 
+                  function openInInventory() {
+                    navigate?.("inventory", { focusSku: product.sku });
+                  }
+
                   return (
-                    <li key={product.productVariantId} className="product-item">
+                    <li
+                      key={product.productVariantId}
+                      className="product-item is-clickable"
+                      role="button"
+                      tabIndex={0}
+                      title={`View ${product.productName} in Inventory`}
+                      onClick={openInInventory}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          openInInventory();
+                        }
+                      }}
+                    >
                       <div className="product-info">
-                        <div
-                          className="product-avatar"
-                          style={{ backgroundColor: color }}
-                        >
-                          {product.productName.charAt(0)}
-                        </div>
                         <div className="product-details">
                           <div className="product-name">{product.productName}</div>
                           <div className="product-sku">{product.sku}</div>

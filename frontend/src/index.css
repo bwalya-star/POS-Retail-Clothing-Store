@@ -745,6 +745,11 @@ button.pill.active {
   justify-content: center;
 }
 
+.item-row.is-highlighted {
+  background: var(--accent-soft);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
 .item-main {
   min-width: 0;
 }
@@ -864,6 +869,22 @@ button.pill.active {
   box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
+.stat-card.is-clickable {
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.stat-card.is-clickable:hover {
+  border-color: var(--accent);
+  transform: translateY(-3px);
+  box-shadow: 0 14px 30px rgba(22, 50, 35, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.stat-card.is-clickable:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .stat-label {
   display: block;
   font-size: 13px;
@@ -887,6 +908,12 @@ button.pill.active {
   border-radius: var(--radius-lg);
   padding: 24px;
   box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.products-section.is-highlighted {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft), var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
 .products-list {
@@ -913,25 +940,21 @@ button.pill.active {
   background: var(--accent-soft);
 }
 
+.product-item.is-clickable {
+  cursor: pointer;
+}
+
+.product-item.is-clickable:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .product-info {
   display: flex;
   align-items: center;
   gap: 12px;
   flex: 1;
   min-width: 180px;
-}
-
-.product-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  color: white;
-  flex-shrink: 0;
-  font-size: 16px;
 }
 
 .product-details {
@@ -999,9 +1022,56 @@ button.pill.active {
 }
 
 .loading-state {
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
   padding: 40px 0;
   color: var(--text-muted);
+}
+
+/* ---------- Loading bars ---------- */
+/* Adapted from Uiverse.io by aryamitra06 */
+
+.loader-bars {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.loader-bar {
+  display: inline-block;
+  width: 3px;
+  height: 20px;
+  background-color: color-mix(in srgb, var(--accent) 50%, transparent);
+  border-radius: 10px;
+  animation: loader-scale 1s linear infinite;
+}
+
+.loader-bar:nth-child(2) {
+  height: 35px;
+  animation-delay: 0.25s;
+}
+
+.loader-bar:nth-child(3) {
+  animation-delay: 0.5s;
+}
+
+@keyframes loader-scale {
+  20% {
+    background-color: var(--accent);
+    transform: scaleY(1.5);
+  }
+
+  40% {
+    transform: scaleY(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loader-bar {
+    animation: none;
+  }
 }
 
 @media (max-width: 640px) {

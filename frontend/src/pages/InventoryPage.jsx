@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../api/client";
 
@@ -15,7 +15,7 @@ const SIZE_OPTIONS = [
   { value: "L", label: "Large" },
 ];
 
-export default function InventoryPage() {
+export default function InventoryPage({ navParams }) {
   const { auth } = useAuth();
   const [products, setProducts] = useState([]);
   const [panel, setPanel] = useState(null); // null | "add" | { mode: "edit", variant } | { mode: "restock", variant }
@@ -24,6 +24,8 @@ export default function InventoryPage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [confirmDeleteSku, setConfirmDeleteSku] = useState(null);
+  const [highlightSku, setHighlightSku] = useState(null);
+  const rowRefs = useRef({});
 
   async function loadInventory() {
     const items = await api.listInventory(auth.token);
@@ -34,6 +36,17 @@ export default function InventoryPage() {
     loadInventory();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Jumped here from the dashboard's "Top Selling Products" - scroll to and
+  // briefly highlight the row once it's actually in `products`.
+  useEffect(() => {
+    const sku = navParams?.focusSku;
+    if (!sku || !products.some((p) => p.sku === sku)) return;
+    rowRefs.current[sku]?.scrollIntoView({ behavior: "smooth", block: "center" });
+    setHighlightSku(sku);
+    const timer = setTimeout(() => setHighlightSku(null), 1600);
+    return () => clearTimeout(timer);
+  }, [navParams, products]);
 
   function openAdd() {
     setForm(BLANK_PRODUCT);
@@ -175,7 +188,12 @@ export default function InventoryPage() {
             const level = stockLevel(v.quantity_on_hand);
             const confirming = confirmDeleteSku === v.sku;
             return (
-              <div key={v.id} className="item-row has-actions" style={{ cursor: "default" }}>
+              <div
+                key={v.id}
+                ref={(el) => { rowRefs.current[v.sku] = el; }}
+                className={`item-row has-actions${highlightSku === v.sku ? " is-highlighted" : ""}`}
+                style={{ cursor: "default" }}
+              >
                 <div className="item-main">
                   <div className="name">{v.product_name}</div>
                   {v.description && <div className="description">{v.description}</div>}

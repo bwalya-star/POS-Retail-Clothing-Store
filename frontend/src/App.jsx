@@ -7,19 +7,25 @@ import POSTerminalPage from "./pages/POSTerminalPage";
 import InventoryPage from "./pages/InventoryPage";
 import EmployeesPage from "./pages/EmployeesPage";
 import DashboardPage from "./pages/DashboardPage";
+import SalesPage from "./pages/SalesPage";
 
 const NAV_BY_ROLE = {
-  cashier: [{ key: "pos", label: "POS" }],
+  cashier: [
+    { key: "pos", label: "POS" },
+    { key: "sales", label: "Sales" },
+  ],
   manager: [
     { key: "dashboard", label: "Dashboard" },
     { key: "pos", label: "POS" },
     { key: "inventory", label: "Inventory" },
+    { key: "sales", label: "Sales" },
     { key: "employees", label: "Employees" },
   ],
   superadmin: [
     { key: "dashboard", label: "Dashboard" },
     { key: "pos", label: "POS" },
     { key: "inventory", label: "Inventory" },
+    { key: "sales", label: "Sales" },
     { key: "employees", label: "Employees" },
   ],
 };
@@ -28,6 +34,7 @@ const PAGES = {
   dashboard: DashboardPage,
   pos: POSTerminalPage,
   inventory: InventoryPage,
+  sales: SalesPage,
   employees: EmployeesPage,
 };
 
@@ -38,13 +45,23 @@ function MainApp() {
   const [activeKey, setActiveKey] = useState(
     navItems[0]?.key
   );
+  const [navParams, setNavParams] = useState(null);
 
   const Page = PAGES[activeKey];
 
+  function navigate(key, params = null) {
+    setActiveKey(key);
+    setNavParams(params);
+  }
+
+  function selectNav(key) {
+    setActiveKey(key);
+    setNavParams(null);
+  }
 
   return (
-    <AppShell navItems={navItems} activeKey={activeKey} onSelect={setActiveKey}>
-      {Page ? <Page /> : null}
+    <AppShell navItems={navItems} activeKey={activeKey} onSelect={selectNav}>
+      {Page ? <Page navigate={navigate} navParams={navParams} /> : null}
     </AppShell>
   );
 }

@@ -39,7 +39,7 @@ function createApp(db) {
   app.use("/api/sales", buildSalesRouter(saleService));
   app.use("/api/inventory", buildInventoryRouter(inventoryService, productRepository));
   app.use("/api/reports", buildReportsRouter(salesReportService));
-  
+
   return app;
 }
 
