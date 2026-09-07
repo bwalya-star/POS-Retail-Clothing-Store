@@ -60,4 +60,10 @@ export const api = {
     request(`/reports/top-sellers?period=${period}&limit=${limit}`, {
       token,
     }),
+
+  getSalesList: (token, { period = "month", cashierId } = {}) => {
+    const params = new URLSearchParams({ period });
+    if (cashierId) params.set("cashierId", cashierId);
+    return request(`/reports/sales?${params.toString()}`, { token });
+  },
 };

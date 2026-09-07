@@ -75,6 +75,38 @@ class SaleRepository {
   }
 
 
+  listSales({ from, to, cashierId }) {
+    const params = [from, to];
+    let cashierFilter = "";
+    if (cashierId) {
+      cashierFilter = "AND s.cashier_id = ?";
+      params.push(cashierId);
+    }
+
+    return this.db
+      .prepare(
+        `SELECT
+           s.id,
+           s.date_time,
+           s.total_amount,
+           s.register_id,
+           s.cashier_id,
+           e.name AS cashierName,
+           p.method AS paymentMethod,
+           (SELECT COUNT(*) FROM sales_line_items sli WHERE sli.sale_id = s.id) AS itemCount
+
+         FROM sales s
+         JOIN employees e ON e.id = s.cashier_id
+         LEFT JOIN payments p ON p.sale_id = s.id
+
+         WHERE s.date_time BETWEEN ? AND ?
+         ${cashierFilter}
+
+         ORDER BY s.date_time DESC`
+      )
+      .all(...params);
+  }
+
   getTopSellingProducts({ from, to, limit }) {
     return this.db
       .prepare(
@@ -112,7 +144,5 @@ class SaleRepository {
       .all(from, to, limit);
   }
 }
-
-module.exports = SaleRepository;
 
 module.exports = SaleRepository;

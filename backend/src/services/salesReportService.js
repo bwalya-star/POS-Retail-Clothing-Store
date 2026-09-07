@@ -118,6 +118,16 @@ class SalesReportService {
       limit,
     });
   }
+
+  getSalesList({ period, cashierId }) {
+    const { from, to } = this.resolvePeriod(period);
+
+    return this.saleRepository.listSales({
+      from,
+      to,
+      cashierId,
+    });
+  }
 }
 
 module.exports = {

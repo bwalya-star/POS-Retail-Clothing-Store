@@ -73,6 +73,17 @@ export default function POSTerminalPage() {
     });
   }
 
+  function handleAmountTyped(e) {
+    // Same rule as the keypad: digits and at most one decimal point.
+    const cleaned = e.target.value.replace(/[^0-9.]/g, "");
+    const firstDot = cleaned.indexOf(".");
+    const sanitized =
+      firstDot === -1
+        ? cleaned
+        : cleaned.slice(0, firstDot + 1) + cleaned.slice(firstDot + 1).replace(/\./g, "");
+    setPaymentAmount(sanitized);
+  }
+
   async function completeSale() {
     setError("");
     try {
@@ -101,6 +112,35 @@ export default function POSTerminalPage() {
     api.listInventory(auth.token).then(setProducts).catch(() => {});
   }
 
+  function downloadReceipt() {
+    const lines = [
+      "POS RETAIL CLOTHING STORE",
+      `Receipt #${receipt.id}`,
+      new Date(receipt.date_time).toLocaleString(),
+      `Cashier: ${auth.name}`,
+      "-".repeat(32),
+      ...receipt.lineItems.map(
+        (li) => `${li.sku} (${li.size}/${li.colour})  x${li.quantity}  K${li.subtotal.toFixed(2)}`
+      ),
+      "-".repeat(32),
+      `Total          K${receipt.total_amount.toFixed(2)}`,
+      `Paid (${receipt.payment.method})    K${receipt.payment.amount.toFixed(2)}`,
+      `Change due     K${receipt.changeDue.toFixed(2)}`,
+      "-".repeat(32),
+      "Thank you for shopping with us!",
+    ];
+
+    const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `receipt-${receipt.id}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
   if (phase === "done" && receipt) {
     return (
       <div className="panel" style={{ margin: "0 auto" }}>
@@ -120,10 +160,16 @@ export default function POSTerminalPage() {
         <div className="summary-row total"><span>Total</span><span>K{receipt.total_amount.toFixed(2)}</span></div>
         <div className="summary-row"><span>Paid ({receipt.payment.method})</span><span>K{receipt.payment.amount.toFixed(2)}</span></div>
         <div className="summary-row"><span>Change due</span><span>K{receipt.changeDue.toFixed(2)}</span></div>
-        <button onClick={startNewSale}>
-          <span>Start New Sale</span>
-          <span></span>
-        </button>
+        <div className="row">
+          <button className="ghost" onClick={downloadReceipt}>
+            <span>Print Receipt</span>
+            <span></span>
+          </button>
+          <button onClick={startNewSale}>
+            <span>Start New Sale</span>
+            <span></span>
+          </button>
+        </div>
       </div>
     );
   }
@@ -212,7 +258,13 @@ export default function POSTerminalPage() {
           {phase === "paying" && (
             <>
               <label>Amount Tendered
-                <input value={paymentAmount} readOnly />
+                <input
+                  value={paymentAmount}
+                  onChange={handleAmountTyped}
+                  inputMode="decimal"
+                  placeholder="0.00"
+                  autoFocus
+                />
               </label>
               <div className="keypad">
                 {["7","8","9","4","5","6","1","2","3",".","0","C"].map((k) => (
